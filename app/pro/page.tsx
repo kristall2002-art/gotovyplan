@@ -1,3 +1,5 @@
+import { OrderForm } from "@/components/OrderForm";
+
 export default function ProPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -49,12 +51,7 @@ export default function ProPage() {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="w-full md:w-auto px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity"
-      >
-        Начать сборку
-      </button>
+      <OrderForm tariff="pro" basePrice={4990} buttonLabel="Начать сборку за" />
     </div>
   );
 }

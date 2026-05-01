@@ -1,3 +1,5 @@
+import { OrderForm } from "@/components/OrderForm";
+
 export default function FullPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -41,12 +43,7 @@ export default function FullPage() {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="w-full md:w-auto px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity"
-      >
-        Заказать полный план
-      </button>
+      <OrderForm tariff="full" basePrice={14990} buttonLabel="Заказать полный план за" />
     </div>
   );
 }

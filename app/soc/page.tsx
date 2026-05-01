@@ -1,3 +1,5 @@
+import { OrderForm } from "@/components/OrderForm";
+
 export default function SocPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -42,12 +44,7 @@ export default function SocPage() {
         </p>
       </div>
 
-      <button
-        type="button"
-        className="w-full md:w-auto px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity"
-      >
-        Заказать план под соцконтракт
-      </button>
+      <OrderForm tariff="soc" basePrice={3990} buttonLabel="Заказать план под соцконтракт за" />
     </div>
   );
 }
