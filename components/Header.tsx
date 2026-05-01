@@ -3,9 +3,9 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const nav = [
   { href: "/quick", label: "Быстрый расчёт" },
-  { href: "/full", label: "Полный план" },
-  { href: "/pro", label: "Конструктор" },
   { href: "/soc", label: "Соцконтракт" },
+  { href: "/pro", label: "Конструктор" },
+  { href: "/full", label: "Полный план" },
 ];
 
 export function Header() {

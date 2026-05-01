@@ -1,0 +1,233 @@
+import {
+  Banknote,
+  Building2,
+  ScrollText,
+  Landmark,
+  Calculator,
+  BarChart3,
+  TrendingUp,
+  Database,
+  MapPin,
+  Map,
+  Compass,
+  MapPinned,
+  ShieldCheck,
+  Flame,
+  HandCoins,
+  FileText,
+  Stethoscope,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+interface Source {
+  icon: LucideIcon;
+  name: string;
+  desc: string;
+}
+
+interface Category {
+  title: string;
+  hint: string;
+  sources: Source[];
+}
+
+const categories: Category[] = [
+  {
+    title: "Финансы и налоги",
+    hint: "Считаем по реальным цифрам, а не «средняя по больнице»",
+    sources: [
+      {
+        icon: Banknote,
+        name: "ФНС России",
+        desc: "Бухотчётность всех ООО и ИП за 6 лет — bo.nalog.ru",
+      },
+      {
+        icon: Building2,
+        name: "ЕГРЮЛ / ЕГРИП",
+        desc: "Реестры юрлиц: учредители, статус, адрес",
+      },
+      {
+        icon: ScrollText,
+        name: "ОКВЭД 2",
+        desc: "Классификатор деятельности — 2700+ кодов",
+      },
+      {
+        icon: Landmark,
+        name: "ЦБ РФ",
+        desc: "Ключевая ставка, инфляция, курсы валют",
+      },
+      {
+        icon: Calculator,
+        name: "Налоговые режимы",
+        desc: "Расчёт УСН, ПСН, НПД, ОСНО для твоего региона",
+      },
+    ],
+  },
+  {
+    title: "Рынок и статистика",
+    hint: "Размер рынка, тренды, ёмкость отрасли",
+    sources: [
+      {
+        icon: BarChart3,
+        name: "Росстат",
+        desc: "Отраслевая статистика, цены, демография регионов",
+      },
+      {
+        icon: TrendingUp,
+        name: "СПАРК-Интерфакс",
+        desc: "Финансы конкурентов, скоринг, тендеры (премиум)",
+      },
+      {
+        icon: Database,
+        name: "Реестр МСП",
+        desc: "Все малые предприятия страны — rmsp.nalog.ru",
+      },
+    ],
+  },
+  {
+    title: "География и конкуренты",
+    hint: "Кто работает рядом, плотность, поток людей",
+    sources: [
+      {
+        icon: MapPin,
+        name: "2GIS",
+        desc: "Точки конкурентов, рейтинги, часы работы",
+      },
+      {
+        icon: Map,
+        name: "OpenStreetMap",
+        desc: "POI в радиусе, инфраструктура района",
+      },
+      {
+        icon: Compass,
+        name: "Yandex Геокодер",
+        desc: "Адрес → координаты, плотность населения",
+      },
+      {
+        icon: MapPinned,
+        name: "DaData",
+        desc: "Стандартизация адресов, поиск компаний по ИНН",
+      },
+    ],
+  },
+  {
+    title: "Регулирование и господдержка",
+    hint: "Что разрешено, что запрещено, кто даёт деньги",
+    sources: [
+      {
+        icon: ShieldCheck,
+        name: "Роспотребнадзор",
+        desc: "СанПиН для общепита, торговли, услуг",
+      },
+      {
+        icon: Flame,
+        name: "МЧС России",
+        desc: "Пожарные нормы для производства и общепита",
+      },
+      {
+        icon: HandCoins,
+        name: "МСП.РФ",
+        desc: "Гранты, льготные кредиты, субсидии регионов",
+      },
+      {
+        icon: FileText,
+        name: "Соцзащита регионов",
+        desc: "Требования к плану под соцконтракт по 85 регионам",
+      },
+      {
+        icon: Stethoscope,
+        name: "Профильные надзоры",
+        desc: "Минздрав, Россельхознадзор, Ростехнадзор по ОКВЭД",
+      },
+    ],
+  },
+];
+
+export function DataSources() {
+  return (
+    <section className="py-24">
+      <div className="text-center mb-16 max-w-2xl mx-auto">
+        <span className="px-3 py-1 mb-5 inline-block text-xs font-medium rounded-full border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--muted)]">
+          За что ты платишь
+        </span>
+        <h2 className="text-3xl md:text-5xl font-bold mb-5">
+          17 государственных баз —
+          <br />
+          в одном бизнес-плане
+        </h2>
+        <p className="text-[var(--muted)] text-lg">
+          Каждая цифра в отчёте — со ссылкой на источник. Никаких выдуманных
+          «по мнению экспертов» — только проверяемые данные из официальных
+          реестров и API.
+        </p>
+      </div>
+
+      <div className="space-y-12">
+        {categories.map((cat) => (
+          <div key={cat.title}>
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-1">{cat.title}</h3>
+              <p className="text-sm text-[var(--muted)]">{cat.hint}</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {cat.sources.map((src) => {
+                const Icon = src.icon;
+                return (
+                  <div
+                    key={src.name}
+                    className="flex gap-4 p-5 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--accent)] transition-colors"
+                  >
+                    <div className="shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                      <Icon size={20} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm mb-1">
+                        {src.name}
+                      </div>
+                      <div className="text-xs text-[var(--muted)] leading-snug">
+                        {src.desc}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-16 grid md:grid-cols-3 gap-6">
+        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
+          <div className="text-3xl font-bold text-[var(--accent)] mb-2">
+            17+
+          </div>
+          <div className="font-semibold mb-1">источников данных</div>
+          <p className="text-sm text-[var(--muted)]">
+            Государственные реестры, API ФНС, Росстата, ЦБ, картографические
+            сервисы.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
+          <div className="text-3xl font-bold text-[var(--accent)] mb-2">
+            85
+          </div>
+          <div className="font-semibold mb-1">регионов РФ</div>
+          <p className="text-sm text-[var(--muted)]">
+            Учитываем налоговые ставки, субсидии, требования соцзащиты для
+            каждого субъекта.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
+          <div className="text-3xl font-bold text-[var(--accent)] mb-2">
+            100%
+          </div>
+          <div className="font-semibold mb-1">с источниками</div>
+          <p className="text-sm text-[var(--muted)]">
+            Каждая цифра в плане — с активной ссылкой на первоисточник.
+            Проверяемо.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
