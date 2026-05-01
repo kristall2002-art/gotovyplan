@@ -18,7 +18,7 @@ export function SocialLinks() {
   return (
     <div className="hidden sm:flex items-center gap-2">
       <a
-        href="https://t.me/bp24"
+        href="https://t.me/+NxIFCQBuxsA3Mzdi"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Telegram-канал"
