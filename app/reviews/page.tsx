@@ -171,16 +171,18 @@ export default function ReviewsPage() {
 
       <div className="mt-16 text-center rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-10">
         <h2 className="text-2xl md:text-3xl font-bold mb-3">
-          Хочешь оказаться следующим?
+          Раздумываешь над своей идеей?
         </h2>
-        <p className="text-[var(--muted)] mb-6 max-w-lg mx-auto">
-          Расскажи свою идею голосом и получи готовый бизнес-план за минуты.
+        <p className="text-[var(--muted)] mb-6 max-w-xl mx-auto">
+          Расскажи голосом — мы оценим жизнеспособность, рассчитаем стартовые
+          вложения и покажем конкурентов в твоём районе. Дальше решишь сам,
+          влезать или нет.
         </p>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity"
         >
-          Заказать план →
+          Оценить идею →
         </Link>
       </div>
     </div>
