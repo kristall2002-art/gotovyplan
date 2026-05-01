@@ -15,18 +15,20 @@ AI-сервис автоматической генерации бизнес-п�
 | Конструктор `/pro` | от 4 990 ₽ или подписка 9 990 ₽/мес | Консультанты, экономисты — для своих клиентов |
 | Полный план `/full` | от 14 990 ₽ | Предприниматели для банка/инвестора |
 
-## Архитектура (no-cloud, всё на своей инфре)
+## Архитектура
 
 ```
 Клиент в РФ
-  │ HTTPS
+  │ HTTPS POST { message, session_id }
   ▼
-Сайт на .ru домене (Next.js статика, GitHub Pages CNAME)
-  │ WebSocket
+Сайт bp24.ru (Next.js статика, GitHub Pages CNAME)
+  │ HTTPS POST на YCF endpoint
+  ▼
+Yandex Cloud Function "chat-ingest" (РФ-фасад, бесплатно)
+  │ HTTPS POST с секретным токеном
   ▼
 Бэкенд на netcup VPS (Python FastAPI, ~50 МБ RAM)
-  ├─ POST /api/order — приём формы
-  ├─ WS /ws/chat — real-time чат
+  ├─ POST /api/message — приём сообщения
   ├─ POST /api/payment-webhook — ЮKassa webhook
   └─ pink-agent CLI integration
        │
@@ -34,18 +36,21 @@ AI-сервис автоматической генерации бизнес-п�
    pink-agent создаёт топик в TG-супергруппе Сергея
        │
        ▼
-   Claude (в этой сессии) = AI-движок:
+   Claude (эта сессия) = AI-движок:
    анализирует идею, задаёт уточнения, генерит PDF
+       │
+       ▼
+   Ответ через stdout → pink-agent → netcup → YCF → сайт → клиент
 ```
 
 **Telegram бот и канал** — параллельные каналы для маркетинга и опционального общения, НЕ критическая инфраструктура.
 
 ## Почему так
 
-🇷🇺 **Telegram нестабилен в РФ** — поэтому диалог с клиентом идёт ЧЕРЕЗ САЙТ, не через бота
-🆓 **Никаких облачных подписок** — всё работает на уже существующем netcup VPS
+🇷🇺 **Telegram нестабилен в РФ** — диалог с клиентом идёт ЧЕРЕЗ САЙТ, не через бота
+🇷🇺 **Yandex Cloud Function** = РФ-фасад поверх netcup. Бесплатно (1 млн вызовов/мес). Только сетевой прокси, данные хранятся на netcup
 🇷🇺 **Cloudflare заблокирован в РФ** — не используем
-🇷🇺 **Yandex Cloud — отказались** (Сергей хочет полный контроль на своём сервере)
+🤖 **AI-движок ТОЛЬКО Claude через pink-agent** — никакого YandexGPT, GigaChat или прямого Anthropic API
 
 ## Стек (на проде)
 
@@ -57,13 +62,14 @@ AI-сервис автоматической генерации бизнес-п�
 
 ## Стек (планируется)
 
+- **РФ-фасад**: Yandex Cloud Function (Python ~30 строк, бесплатно)
 - **Бэкенд**: Python FastAPI на netcup VPS (под systemd рядом с pink-agent)
-- **БД**: SQLite или PostgreSQL для заявок и промокодов
+- **БД**: SQLite на netcup для заявок, промокодов, истории чата
 - **Платежи**: ЮKassa Checkout виджет (карта/СБП/SberPay/YandexPay)
 - **PDF**: HTML → Edge headless (как в `~/sync/CLAUDE/` пайплайне Сергея)
 - **Excel**: openpyxl
 - **Голос**: Web Speech API (browser, бесплатно)
-- **AI-движок**: pink-agent → Claude session per order
+- **AI-движок**: pink-agent → Claude session per order (НЕ YandexGPT, НЕ Anthropic API напрямую)
 
 ## Источники данных РФ (16 баз — будущая RAG)
 
