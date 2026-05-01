@@ -112,7 +112,7 @@ export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
       <p className="text-xs text-[var(--muted)] text-center mt-3">
         💡 Подпишись на{" "}
         <a
-          href="https://t.me/bp24"
+          href="https://t.me/businessplan24_bot"
           target="_blank"
           rel="noopener noreferrer"
           className="text-[var(--accent)] hover:underline"
