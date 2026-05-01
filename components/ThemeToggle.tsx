@@ -11,7 +11,7 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="w-9 h-9" aria-hidden />;
+    return <div className="w-[120px] h-9" aria-hidden />;
   }
 
   const isDark = theme === "dark";
@@ -21,9 +21,10 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Переключить тему"
-      className="w-9 h-9 grid place-items-center rounded-full border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+      className="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-[var(--border)] bg-[var(--muted-bg)] text-sm font-medium text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
     >
-      {isDark ? <Sun size={16} /> : <Moon size={16} />}
+      {isDark ? <Moon size={15} /> : <Sun size={15} />}
+      <span>{isDark ? "Тёмная" : "Светлая"}</span>
     </button>
   );
 }

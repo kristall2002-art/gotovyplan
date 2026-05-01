@@ -1,6 +1,7 @@
 import { MicButton } from "@/components/MicButton";
 import { PlanCard } from "@/components/PlanCard";
 import { DataSources } from "@/components/DataSources";
+import { Deliverables } from "@/components/Deliverables";
 
 export default function HomePage() {
   return (
@@ -91,6 +92,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <Deliverables />
       <DataSources />
     </div>
   );

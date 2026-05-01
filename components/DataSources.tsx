@@ -3,10 +3,10 @@ import {
   Building2,
   ScrollText,
   Landmark,
-  Calculator,
   BarChart3,
   TrendingUp,
   Database,
+  Search,
   MapPin,
   Map,
   Compass,
@@ -15,7 +15,6 @@ import {
   Flame,
   HandCoins,
   FileText,
-  Stethoscope,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -34,32 +33,27 @@ interface Category {
 const categories: Category[] = [
   {
     title: "Финансы и налоги",
-    hint: "Считаем по реальным цифрам, а не «средняя по больнице»",
+    hint: "Считаем по реальным цифрам, а не «в среднем по больнице»",
     sources: [
       {
         icon: Banknote,
         name: "ФНС России",
-        desc: "Бухотчётность всех ООО и ИП за 6 лет — bo.nalog.ru",
+        desc: "Бухотчётность всех ООО и ИП + расчёт УСН/ПСН/НПД для региона",
       },
       {
         icon: Building2,
         name: "ЕГРЮЛ / ЕГРИП",
-        desc: "Реестры юрлиц: учредители, статус, адрес",
+        desc: "Реестры юрлиц и ИП: учредители, статус, история",
       },
       {
         icon: ScrollText,
         name: "ОКВЭД 2",
-        desc: "Классификатор деятельности — 2700+ кодов",
+        desc: "Классификатор деятельности — 2700+ кодов с маппингом на лицензии",
       },
       {
         icon: Landmark,
         name: "ЦБ РФ",
-        desc: "Ключевая ставка, инфляция, курсы валют",
-      },
-      {
-        icon: Calculator,
-        name: "Налоговые режимы",
-        desc: "Расчёт УСН, ПСН, НПД, ОСНО для твоего региона",
+        desc: "Ключевая ставка, инфляция, курсы валют — для дисконтирования",
       },
     ],
   },
@@ -70,17 +64,22 @@ const categories: Category[] = [
       {
         icon: BarChart3,
         name: "Росстат",
-        desc: "Отраслевая статистика, цены, демография регионов",
+        desc: "Отраслевая статистика, цены, демография по 85 регионам",
       },
       {
         icon: TrendingUp,
         name: "СПАРК-Интерфакс",
-        desc: "Финансы конкурентов, скоринг, тендеры (премиум)",
+        desc: "Финансы конкурентов, скоринг, тендеры, аффилиации",
       },
       {
         icon: Database,
         name: "Реестр МСП",
-        desc: "Все малые предприятия страны — rmsp.nalog.ru",
+        desc: "Все малые и средние предприятия страны — rmsp.nalog.ru",
+      },
+      {
+        icon: Search,
+        name: "Yandex Wordstat",
+        desc: "Поисковый спрос на товар/услугу по регионам и сезонам",
       },
     ],
   },
@@ -91,17 +90,17 @@ const categories: Category[] = [
       {
         icon: MapPin,
         name: "2GIS",
-        desc: "Точки конкурентов, рейтинги, часы работы",
+        desc: "Точки конкурентов, рейтинги, часы работы, фото",
       },
       {
         icon: Map,
         name: "OpenStreetMap",
-        desc: "POI в радиусе, инфраструктура района",
+        desc: "POI в радиусе, инфраструктура района, транспорт",
       },
       {
         icon: Compass,
         name: "Yandex Геокодер",
-        desc: "Адрес → координаты, плотность населения",
+        desc: "Адрес → координаты, плотность населения, проходимость",
       },
       {
         icon: MapPinned,
@@ -117,27 +116,22 @@ const categories: Category[] = [
       {
         icon: ShieldCheck,
         name: "Роспотребнадзор",
-        desc: "СанПиН для общепита, торговли, услуг",
+        desc: "СанПиН для общепита, торговли, услуг, производства",
       },
       {
         icon: Flame,
         name: "МЧС России",
-        desc: "Пожарные нормы для производства и общепита",
+        desc: "Пожарные нормы для производства, общепита, складов",
       },
       {
         icon: HandCoins,
         name: "МСП.РФ",
-        desc: "Гранты, льготные кредиты, субсидии регионов",
+        desc: "Гранты, льготные кредиты, субсидии регионов и Минэка",
       },
       {
         icon: FileText,
         name: "Соцзащита регионов",
-        desc: "Требования к плану под соцконтракт по 85 регионам",
-      },
-      {
-        icon: Stethoscope,
-        name: "Профильные надзоры",
-        desc: "Минздрав, Россельхознадзор, Ростехнадзор по ОКВЭД",
+        desc: "Требования к плану под соцконтракт по 85 регионам РФ",
       },
     ],
   },
@@ -151,7 +145,7 @@ export function DataSources() {
           За что ты платишь
         </span>
         <h2 className="text-3xl md:text-5xl font-bold mb-5">
-          17 государственных баз —
+          16 государственных баз —
           <br />
           в одном бизнес-плане
         </h2>
@@ -169,7 +163,7 @@ export function DataSources() {
               <h3 className="text-xl font-semibold mb-1">{cat.title}</h3>
               <p className="text-sm text-[var(--muted)]">{cat.hint}</p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {cat.sources.map((src) => {
                 const Icon = src.icon;
                 return (
@@ -199,22 +193,20 @@ export function DataSources() {
       <div className="mt-16 grid md:grid-cols-3 gap-6">
         <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
           <div className="text-3xl font-bold text-[var(--accent)] mb-2">
-            17+
+            16+
           </div>
           <div className="font-semibold mb-1">источников данных</div>
           <p className="text-sm text-[var(--muted)]">
-            Государственные реестры, API ФНС, Росстата, ЦБ, картографические
-            сервисы.
+            Государственные реестры, API ФНС и Росстата, ЦБ РФ,
+            картографические сервисы.
           </p>
         </div>
         <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
-          <div className="text-3xl font-bold text-[var(--accent)] mb-2">
-            85
-          </div>
+          <div className="text-3xl font-bold text-[var(--accent)] mb-2">85</div>
           <div className="font-semibold mb-1">регионов РФ</div>
           <p className="text-sm text-[var(--muted)]">
-            Учитываем налоговые ставки, субсидии, требования соцзащиты для
-            каждого субъекта.
+            Налоговые ставки, субсидии, требования соцзащиты для каждого
+            субъекта федерации.
           </p>
         </div>
         <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
@@ -224,7 +216,7 @@ export function DataSources() {
           <div className="font-semibold mb-1">с источниками</div>
           <p className="text-sm text-[var(--muted)]">
             Каждая цифра в плане — с активной ссылкой на первоисточник.
-            Проверяемо.
+            Проверяемо построчно.
           </p>
         </div>
       </div>
