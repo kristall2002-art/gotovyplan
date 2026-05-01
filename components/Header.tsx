@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
+import { SocialLinks } from "./SocialLinks";
 
 const nav = [
   { href: "/quick", label: "Быстрый расчёт" },
   { href: "/soc", label: "Соцконтракт" },
   { href: "/pro", label: "Конструктор" },
   { href: "/full", label: "Полный план" },
+  { href: "/reviews", label: "Отзывы" },
 ];
 
 export function Header() {
@@ -19,7 +21,7 @@ export function Header() {
           <span className="text-lg">БП24</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm text-[var(--muted)]">
+        <nav className="hidden md:flex items-center gap-6 text-sm text-[var(--muted)]">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -31,7 +33,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <SocialLinks />
           <ThemeToggle />
         </div>
       </div>
