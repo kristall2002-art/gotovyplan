@@ -1,26 +1,35 @@
+"use client";
+
+import { useState } from "react";
+import { IdeaInput } from "@/components/IdeaInput";
 import { OrderForm } from "@/components/OrderForm";
 
 export default function QuickPage() {
+  const [idea, setIdea] = useState("");
+  const [, setFile] = useState<File | null>(null);
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
-      <span className="text-sm text-[var(--accent)] font-medium">
-        Тариф 1
-      </span>
+      <span className="text-sm text-[var(--accent)] font-medium">Тариф 1</span>
       <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">
         Быстрый расчёт
       </h1>
       <p className="text-lg text-[var(--muted)] mb-8">
-        Для тех, кто думает «открыть бы кофейню / шаурму / маникюр» и хочет
-        понять — стоит ли вообще влезать. За 990 ₽ получишь честный ответ
-        со ссылками на источники.
+        Для тех, кто думает: «открыть бы кофейню / шаурму / маникюр» — и хочет
+        понять, стоит ли вообще влезать. За 990 ₽ получишь реальный анализ
+        своей идеи, чтобы решить — двигаться дальше или нет.
       </p>
 
+      <IdeaInput value={idea} onChange={setIdea} onFileChange={setFile} />
+
       <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-8 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Что внутри PDF (5–7 страниц)</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Что внутри: PDF, 5–7 страниц
+        </h2>
         <ul className="space-y-3 text-sm">
-          <li>✅ Можно ли это вообще делать — лицензии, ОКВЭД, ограничения</li>
-          <li>✅ Какой налоговый режим выгоднее (УСН / ПСН / НПД)</li>
-          <li>✅ Конкуренты в твоём районе с радиусом и плотностью</li>
+          <li>✅ Можно ли это вообще делать: лицензии, ОКВЭД, ограничения</li>
+          <li>✅ Какой налоговый режим выгоднее: УСН, ПСН или НПД</li>
+          <li>✅ Конкуренты в твоём районе: радиус и плотность</li>
           <li>✅ Диапазон стартовых вложений и срок окупаемости</li>
           <li>✅ Топ-3 риска с оценкой вероятности</li>
           <li>✅ Готов ли регион поддержать субсидией</li>
@@ -28,15 +37,15 @@ export default function QuickPage() {
       </div>
 
       <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-8 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Чего НЕТ в этом тарифе</h2>
+        <h2 className="text-xl font-semibold mb-4">Чего нет в этом тарифе</h2>
         <ul className="space-y-3 text-sm text-[var(--muted)]">
           <li>— точных цифр выручки и прибыли (только диапазоны)</li>
           <li>— Excel-финмодели по месяцам</li>
           <li>— подробного маркетинг-плана</li>
-          <li>— документов для банка/инвестора</li>
+          <li>— документов для банка или инвестора</li>
         </ul>
         <p className="text-sm mt-5">
-          Это нужно? Тогда смотри{" "}
+          Нужно подробнее? Тогда смотри{" "}
           <a href="/full" className="text-[var(--accent)] underline">
             Полный бизнес-план
           </a>
