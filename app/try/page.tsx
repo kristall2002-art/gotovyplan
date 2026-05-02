@@ -27,9 +27,9 @@ export default function TryPage() {
           Идея принята!
         </h1>
         <p className="text-[var(--muted)] mb-8 max-w-xl mx-auto">
-          Сейчас собираем бесплатный отчёт — юридическую чистку, карту
-          конкурентов и топ-3 риска. Это займёт 1–3 минуты. Отчёт придёт сюда же
-          и продублируется в Telegram-бот, если оставишь контакт.
+          Сейчас собираем бесплатный бизнес-план — юридическую чистку, карту
+          конкурентов и топ-3 риска. Это займёт 1–3 минуты. Бизнес-план придёт
+          сюда же и продублируется в Telegram-бот, если оставишь контакт.
         </p>
         <a
           href="/"
@@ -50,13 +50,13 @@ export default function TryPage() {
         Попробуй бесплатно
       </h1>
       <p className="text-lg text-[var(--muted)] mb-8">
-        Расскажи свою идею — голосом или текстом — и получи короткий отчёт
+        Расскажи свою идею — голосом или текстом — и получи короткий бизнес-план
         бесплатно. Без обязательств, без оплаты, без ввода карты. Подойдёт,
         чтобы понять — есть ли вообще смысл копать дальше.
       </p>
 
       <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Что будет в отчёте</h2>
+        <h2 className="text-xl font-semibold mb-4">Что будет в бизнес-плане</h2>
         <div className="space-y-4">
           <div className="flex gap-3 items-start">
             <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] grid place-items-center">
@@ -119,7 +119,7 @@ export default function TryPage() {
         className="w-full px-8 py-5 rounded-xl bg-[var(--accent)] text-white font-bold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg"
         style={{ boxShadow: "0 0 30px rgba(14,165,233,0.35)" }}
       >
-        <Gift size={20} /> Получить бесплатный отчёт
+        <Gift size={20} /> Получить бизнес-план бесплатно
       </button>
 
       <p className="text-xs text-[var(--muted)] text-center mt-4">

@@ -40,7 +40,7 @@ export function MicButton() {
       </div>
 
       <p className="mt-6 text-sm text-[var(--muted)] max-w-xs text-center">
-        Нажми на микрофон — расскажи идею голосом и получи бесплатный отчёт
+        Нажми на микрофон — расскажи идею голосом и получи бизнес-план бесплатно
       </p>
     </div>
   );

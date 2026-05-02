@@ -134,33 +134,34 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
         Нажми на микрофон и наговори, или напиши текстом, или приложи файл.
       </p>
 
-      <div className="flex gap-3 items-start mb-3">
+      <div className="flex justify-center mb-4">
         <button
           type="button"
           onClick={recording ? stop : start}
           disabled={!supported}
           aria-label={recording ? "Остановить запись" : "Начать запись"}
-          className={`shrink-0 w-14 h-14 rounded-full grid place-items-center text-white transition-all ${
+          className={`w-20 h-20 rounded-full grid place-items-center text-white transition-all ${
             recording
               ? "bg-rose-500 hover:bg-rose-600 animate-pulse"
-              : "bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              : "bg-[var(--accent)] hover:opacity-90 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
           }`}
           style={
             recording
-              ? { boxShadow: "0 0 20px rgba(244,63,94,0.5)" }
-              : undefined
+              ? { boxShadow: "0 0 30px rgba(244,63,94,0.55)" }
+              : { boxShadow: "0 0 25px rgba(14,165,233,0.4)" }
           }
         >
-          {recording ? <MicOff size={24} /> : <Mic size={24} />}
+          {recording ? <MicOff size={32} /> : <Mic size={32} />}
         </button>
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={10}
-          placeholder="Опиши: что хочешь делать, в каком городе, какой бюджет, кто покупатель…"
-          className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-y min-h-[240px]"
-        />
       </div>
+
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={12}
+        placeholder="Опиши: что хочешь делать, в каком городе, какой бюджет, кто покупатель…"
+        className="w-full px-4 py-3 mb-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-y min-h-[320px]"
+      />
 
       <div className="flex items-center gap-3 flex-wrap">
         <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-sm font-medium transition-colors cursor-pointer">
