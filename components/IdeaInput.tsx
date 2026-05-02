@@ -156,9 +156,9 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          rows={5}
+          rows={10}
           placeholder="Опиши: что хочешь делать, в каком городе, какой бюджет, кто покупатель…"
-          className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-y min-h-[120px]"
+          className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-y min-h-[240px]"
         />
       </div>
 
