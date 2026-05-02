@@ -86,7 +86,7 @@ export default function TryPage() {
           Сейчас собираем бесплатный бизнес-план — юридическую чистку, карту
           конкурентов и топ-3 риска.
         </p>
-        <p className="text-[var(--muted)] mb-8 max-w-xl mx-auto">
+        <p className="text-[var(--muted)] mb-2 max-w-xl mx-auto">
           Это займёт 1–3 минуты. Готовый план придёт{" "}
           <strong className="text-[var(--foreground)]">
             {contactType === "telegram"
@@ -95,6 +95,24 @@ export default function TryPage() {
           </strong>
           .
         </p>
+        {contactType === "telegram" ? (
+          <p className="text-sm text-[var(--muted)] mb-8 max-w-xl mx-auto">
+            План пришлёт наш бот{" "}
+            <a
+              href="https://t.me/businessplan24_bot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--accent)] underline font-medium"
+            >
+              @businessplan24_bot
+            </a>
+            . Найди его в Telegram и нажми «Старт», если ещё не общались.
+          </p>
+        ) : (
+          <p className="text-sm text-[var(--muted)] mb-8 max-w-xl mx-auto">
+            Если не увидишь письма за 5 минут — проверь папку «Спам».
+          </p>
+        )}
         <a
           href="/"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
