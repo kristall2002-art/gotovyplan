@@ -271,7 +271,7 @@ SQLite WAL + автоэкспорт в Excel (атомарный, BackgroundTask
 - **GitHub:** [kristall2002-art/gotovyplan](https://github.com/kristall2002-art/gotovyplan) (public)
 - **Сайт локально:** `~/gotovyplan/`
 - **Бэкенд локально:** `~/bp24-backend/`
-- **TG-бот токен:** `~/gotovyplan/.env.local` → `TELEGRAM_BOT_TOKEN=8781723520:AAH_eyS99WNXwzu2-Aj0ZpZaYigxVnbk5mM`
+- **TG-бот токен:** `~/gotovyplan/.env.local` → `TELEGRAM_BOT_TOKEN` (не коммитить, gitignored)
 - **Admin token API:** `~/bp24-backend/.env` → `BP24_ADMIN_TOKEN`
 - **Юра @YuraZol** — потенциальный второй админ
 - **Email Сергея:** kristall2002@gmail.com
