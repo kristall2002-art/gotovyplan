@@ -2,19 +2,74 @@
 
 import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
-import { Gift, MapPin, Scale, AlertTriangle } from "lucide-react";
+import { ContactPicker, type ContactType } from "@/components/ContactPicker";
+import { createOrder } from "@/lib/api";
+import { Gift, MapPin, Scale, AlertTriangle, Loader2 } from "lucide-react";
+
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function isValidTelegram(v: string) {
+  return /^@?[A-Za-z0-9_]{4,32}$/.test(v.trim());
+}
 
 export default function TryPage() {
   const [idea, setIdea] = useState("");
   const [, setFile] = useState<File | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [contactType, setContactType] = useState<ContactType>("telegram");
+  const [contactValue, setContactValue] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState<{ id: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  function submit() {
-    if (!idea.trim()) {
-      alert("Расскажи идею — голосом или текстом — и тогда жми кнопку.");
+  async function submit() {
+    setError(null);
+
+    if (!idea.trim() || idea.trim().length < 10) {
+      setError("Расскажи идею подробнее — минимум 10 символов.");
       return;
     }
-    setSubmitted(true);
+    if (!contactValue.trim()) {
+      setError(
+        contactType === "telegram"
+          ? "Укажи Telegram-username, чтобы прислать бизнес-план."
+          : "Укажи email, чтобы прислать бизнес-план."
+      );
+      return;
+    }
+    if (contactType === "telegram" && !isValidTelegram(contactValue)) {
+      setError("Telegram-username должен быть 4–32 символа, латиница, цифры, _.");
+      return;
+    }
+    if (contactType === "email" && !isValidEmail(contactValue)) {
+      setError("Email выглядит некорректно — проверь.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const tg =
+        contactType === "telegram"
+          ? contactValue.startsWith("@")
+            ? contactValue
+            : "@" + contactValue.trim()
+          : undefined;
+      const em = contactType === "email" ? contactValue.trim() : undefined;
+      const res = await createOrder({
+        tariff: "try",
+        idea: idea.trim(),
+        telegram: tg,
+        email: em,
+        base_price: 0,
+        final_price: 0,
+      });
+      setSubmitted({ id: res.id });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -23,13 +78,19 @@ export default function TryPage() {
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/15 text-emerald-500 mb-6">
           <Gift size={40} />
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Идея принята!
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">Идея принята!</h1>
+        <p className="text-[var(--muted)] mb-2 max-w-xl mx-auto">
+          Заявка №{submitted.id} зарегистрирована. Сейчас собираем бесплатный
+          бизнес-план — юридическую чистку, карту конкурентов и топ-3 риска.
+        </p>
         <p className="text-[var(--muted)] mb-8 max-w-xl mx-auto">
-          Сейчас собираем бесплатный бизнес-план — юридическую чистку, карту
-          конкурентов и топ-3 риска. Это займёт 1–3 минуты. Бизнес-план придёт
-          сюда же и продублируется в Telegram-бот, если оставишь контакт.
+          Это займёт 1–3 минуты. Готовый план придёт{" "}
+          <strong className="text-[var(--foreground)]">
+            {contactType === "telegram"
+              ? `в Telegram на ${contactValue.startsWith("@") ? contactValue : "@" + contactValue}`
+              : `на email ${contactValue}`}
+          </strong>
+          .
         </p>
         <a
           href="/"
@@ -105,7 +166,9 @@ export default function TryPage() {
         </div>
 
         <div className="mt-6 pt-5 border-t border-[var(--border)] text-sm text-[var(--muted)]">
-          <strong className="text-[var(--foreground)]">Чего нет в пробнике:</strong>{" "}
+          <strong className="text-[var(--foreground)]">
+            Чего нет в пробнике:
+          </strong>{" "}
           расчёта окупаемости, выбора оптимального налога, оценки выручки,
           Excel-финмодели, маркетинг-плана. Это всё в платных тарифах от 990 ₽.
         </div>
@@ -113,13 +176,35 @@ export default function TryPage() {
 
       <IdeaInput value={idea} onChange={setIdea} onFileChange={setFile} />
 
+      <ContactPicker
+        type={contactType}
+        value={contactValue}
+        onTypeChange={setContactType}
+        onValueChange={setContactValue}
+      />
+
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm">
+          {error}
+        </div>
+      )}
+
       <button
         type="button"
         onClick={submit}
-        className="w-full px-8 py-5 rounded-xl bg-[var(--accent)] text-white font-bold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg"
+        disabled={submitting}
+        className="w-full px-8 py-5 rounded-xl bg-[var(--accent)] text-white font-bold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg disabled:opacity-60 disabled:cursor-wait"
         style={{ boxShadow: "0 0 30px rgba(14,165,233,0.35)" }}
       >
-        <Gift size={20} /> Получить бизнес-план бесплатно
+        {submitting ? (
+          <>
+            <Loader2 size={20} className="animate-spin" /> Отправляем…
+          </>
+        ) : (
+          <>
+            <Gift size={20} /> Получить бизнес-план бесплатно
+          </>
+        )}
       </button>
 
       <p className="text-xs text-[var(--muted)] text-center mt-4">

@@ -41,41 +41,35 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   const [file, setFile] = useState<File | null>(null);
 
   const recRef = useRef<SR | null>(null);
-  // Текст до начала записи (то что уже было в textarea).
+  const wantRef = useRef<boolean>(false);
   const prefixRef = useRef<string>("");
-  // Накопленный финальный распознанный текст за текущую сессию.
   const finalRef = useRef<string>("");
-  // До какого индекса в e.results мы уже подняли final.
   const finalIdxRef = useRef<number>(0);
+  const restartTimerRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) setSupported(false);
+    return () => {
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
   }, []);
 
-  function start() {
-    setError(null);
+  function buildRecognition(): SR | null {
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
       setSupported(false);
-      return;
+      return null;
     }
-
     const rec = new Ctor();
     rec.lang = "ru-RU";
-    rec.continuous = true;
+    rec.continuous = false;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
-    prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
-    finalRef.current = "";
-    finalIdxRef.current = 0;
-
     rec.onresult = (e) => {
-      // Каждое событие приносит весь массив results с начала сессии.
-      // resultIndex — индекс первого результата, который изменился в этом событии.
-      // Считаем интерим из всего массива (последний интерим всегда актуален).
-      // Final аккумулируем только раз — отслеживая finalIdxRef.
       let interim = "";
       const len = e.results.length;
       for (let i = 0; i < len; i++) {
@@ -94,16 +88,67 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     };
 
     rec.onerror = (ev) => {
-      if (ev.error === "no-speech" || ev.error === "aborted") return;
+      if (ev.error === "aborted") return;
+      if (ev.error === "no-speech" || ev.error === "audio-capture") return;
       setError(`Ошибка распознавания: ${ev.error}`);
     };
 
     rec.onend = () => {
-      // Очищаем хвостовой interim — оставляем только final.
       onChange(prefixRef.current + finalRef.current);
-      setRecording(false);
+      finalIdxRef.current = 0;
+      if (wantRef.current) {
+        restartTimerRef.current = window.setTimeout(() => {
+          if (!wantRef.current) return;
+          try {
+            rec.start();
+          } catch {
+            // SR throws if already started/stopping — пробуем заново через тик.
+            restartTimerRef.current = window.setTimeout(() => {
+              if (wantRef.current) {
+                const fresh = buildRecognition();
+                if (fresh) {
+                  recRef.current = fresh;
+                  fresh.start();
+                }
+              }
+            }, 100);
+          }
+        }, 50);
+      } else {
+        setRecording(false);
+      }
     };
 
+    return rec;
+  }
+
+  async function start() {
+    setError(null);
+    if (!window.isSecureContext && location.hostname !== "localhost") {
+      setError("Микрофон работает только на HTTPS-сайтах.");
+      return;
+    }
+
+    try {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+    } catch (err) {
+      setError(`Нет доступа к микрофону: ${(err as Error).message}`);
+      return;
+    }
+
+    prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
+    finalRef.current = "";
+    finalIdxRef.current = 0;
+    wantRef.current = true;
+
+    const rec = buildRecognition();
+    if (!rec) return;
     recRef.current = rec;
     try {
       rec.start();
@@ -114,11 +159,16 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   }
 
   function stop() {
+    wantRef.current = false;
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
     const r = recRef.current;
     recRef.current = null;
-    if (r) {
-      r.stop();
-    }
+    if (r) r.stop();
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
     setRecording(false);
   }
 
@@ -191,7 +241,7 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
 
       {recording && (
         <p className="mt-3 text-xs text-rose-500">
-          ● Запись идёт. Говори в микрофон. Текст появляется в поле справа.
+          ● Запись идёт. Говори в микрофон. Текст появляется ниже.
         </p>
       )}
       {!supported && (
