@@ -1,11 +1,55 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { MicButton } from "@/components/MicButton";
 import { PlanCard } from "@/components/PlanCard";
 import { DataSources } from "@/components/DataSources";
 import { Deliverables } from "@/components/Deliverables";
 
+export const metadata: Metadata = {
+  title: {
+    absolute: "БП24 — готовый бизнес-план онлайн с AI",
+  },
+  description:
+    "AI-сервис бизнес-планов: быстрый расчёт за 990 ₽, план под соцконтракт, полный план для банка с Excel-финмоделью и конструктор для консультантов.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "БП24 — готовый бизнес-план онлайн с AI",
+    description:
+      "AI-сервис бизнес-планов: быстрый расчёт, соцконтракт, план для банка с финмоделью, конструктор для консультантов.",
+    url: "/",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "БП24",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "БП24 — готовый бизнес-план онлайн с AI",
+    description:
+      "AI-сервис бизнес-планов: быстрый расчёт, соцконтракт, план для банка, конструктор Pro.",
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "БП24",
+  url: "https://kristall2002-art.github.io/gotovyplan",
+  inLanguage: "ru-RU",
+  description:
+    "AI-сервис генерации бизнес-планов: быстрый расчёт, соцконтракт, полный план для банка, конструктор для консультантов.",
+};
+
 export default function HomePage() {
   return (
     <div className="mx-auto max-w-6xl px-6">
+      <Script
+        id="ld-website"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       {/* Hero */}
       <section className="py-24 md:py-32 flex flex-col items-center text-center">
         <span className="px-3 py-1 mb-6 text-xs font-medium rounded-full border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--muted)]">

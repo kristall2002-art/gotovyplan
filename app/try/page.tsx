@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
 import { ContactPicker, type ContactType } from "@/components/ContactPicker";
-import { createOrder } from "@/lib/api";
+import { createOrder, uploadAttachment } from "@/lib/api";
 import { Gift, MapPin, Scale, AlertTriangle, Loader2 } from "lucide-react";
 
 function isValidEmail(v: string) {
@@ -16,11 +16,11 @@ function isValidTelegram(v: string) {
 
 export default function TryPage() {
   const [idea, setIdea] = useState("");
-  const [, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [contactType, setContactType] = useState<ContactType>("telegram");
   const [contactValue, setContactValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState<{ id: number } | null>(null);
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
@@ -56,7 +56,7 @@ export default function TryPage() {
             : "@" + contactValue.trim()
           : undefined;
       const em = contactType === "email" ? contactValue.trim() : undefined;
-      const res = await createOrder({
+      const order = await createOrder({
         tariff: "try",
         idea: idea.trim(),
         telegram: tg,
@@ -64,7 +64,10 @@ export default function TryPage() {
         base_price: 0,
         final_price: 0,
       });
-      setSubmitted({ id: res.id });
+      if (file) {
+        await uploadAttachment(order.id, file);
+      }
+      setSubmitted(true);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -80,8 +83,8 @@ export default function TryPage() {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Идея принята!</h1>
         <p className="text-[var(--muted)] mb-2 max-w-xl mx-auto">
-          Заявка №{submitted.id} зарегистрирована. Сейчас собираем бесплатный
-          бизнес-план — юридическую чистку, карту конкурентов и топ-3 риска.
+          Сейчас собираем бесплатный бизнес-план — юридическую чистку, карту
+          конкурентов и топ-3 риска.
         </p>
         <p className="text-[var(--muted)] mb-8 max-w-xl mx-auto">
           Это займёт 1–3 минуты. Готовый план придёт{" "}

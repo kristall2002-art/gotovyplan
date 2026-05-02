@@ -1,8 +1,81 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { OrderForm } from "@/components/OrderForm";
+
+export const metadata: Metadata = {
+  title: "Полный бизнес-план для банка с финмоделью Excel",
+  description:
+    "Готовый бизнес-план для банка, инвестора или гранта: 30–40 страниц, Excel-финмодель с P&L, cash flow, NPV/IRR, анализ рынка по Росстату. Готовность за 24 часа.",
+  keywords: [
+    "бизнес-план для банка",
+    "бизнес-план с финмоделью",
+    "бизнес-план с Excel",
+    "бизнес-план для инвестора",
+    "бизнес-план для гранта",
+    "бизнес-план NPV IRR",
+    "финансовая модель бизнес-плана",
+    "бизнес-план с анализом рынка",
+  ],
+  alternates: {
+    canonical: "/full",
+  },
+  openGraph: {
+    title: "Полный бизнес-план для банка с финмоделью Excel",
+    description:
+      "30–40 страниц + Excel: P&L, cash flow, NPV/IRR. Анализ рынка с источниками. Готовность за 24 часа.",
+    url: "/full",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "БП24",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Полный бизнес-план для банка с финмоделью Excel",
+    description:
+      "30–40 страниц + Excel-финмодель. Готовность за 24 часа от 14 990 ₽.",
+  },
+};
+
+const offerJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Полный бизнес-план для банка",
+  description:
+    "Бизнес-план 30–40 страниц с Excel-финмоделью (P&L, cash flow, NPV/IRR), анализ рынка по Росстату, конкуренты по ФНС, маркетинг-план.",
+  provider: {
+    "@type": "Organization",
+    name: "БП24",
+  },
+  areaServed: "RU",
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Стандартный",
+      price: "14990",
+      priceCurrency: "RUB",
+      availability: "https://schema.org/InStock",
+      url: "https://kristall2002-art.github.io/gotovyplan/full",
+    },
+    {
+      "@type": "Offer",
+      name: "Расширенный",
+      price: "24990",
+      priceCurrency: "RUB",
+      availability: "https://schema.org/InStock",
+      url: "https://kristall2002-art.github.io/gotovyplan/full",
+    },
+  ],
+};
 
 export default function FullPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
+      <Script
+        id="ld-full"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }}
+      />
       <span className="text-sm text-[var(--accent)] font-medium">Тариф 2</span>
       <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">
         Полный бизнес-план

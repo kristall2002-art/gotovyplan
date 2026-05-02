@@ -1,8 +1,86 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { OrderForm } from "@/components/OrderForm";
+
+export const metadata: Metadata = {
+  title: "Конструктор бизнес-планов Pro для консультантов",
+  description:
+    "Сервис автоматической генерации бизнес-планов для консультантов и сметчиков: модульная сборка, данные Росстата и ФНС, white-label PDF, выгрузка Word, Excel, PDF.",
+  keywords: [
+    "конструктор бизнес-планов",
+    "автоматическая генерация бизнес-плана",
+    "бизнес-план для консультантов",
+    "white-label бизнес-план",
+    "бизнес-план Росстат ФНС",
+    "подписка бизнес-план",
+    "сервис бизнес-планов Pro",
+  ],
+  alternates: {
+    canonical: "/pro",
+  },
+  openGraph: {
+    title: "Конструктор бизнес-планов Pro для консультантов",
+    description:
+      "Модульная сборка плана, данные Росстата и ФНС, white-label PDF. От 4 990 ₽ или подписка 9 990 ₽/мес.",
+    url: "/pro",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "БП24",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Конструктор бизнес-планов Pro",
+    description:
+      "Для консультантов и сметчиков: модули, данные Росстата и ФНС, white-label.",
+  },
+};
+
+const offerJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Конструктор бизнес-планов Pro",
+  description:
+    "Модульная сборка бизнес-планов с прямым доступом к данным Росстата и ФНС, white-label PDF, выгрузка Word/Excel/PDF, шаблоны под банки и фонды.",
+  provider: {
+    "@type": "Organization",
+    name: "БП24",
+  },
+  areaServed: "RU",
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Разовый план",
+      price: "4990",
+      priceCurrency: "RUB",
+      availability: "https://schema.org/InStock",
+      url: "https://kristall2002-art.github.io/gotovyplan/pro",
+    },
+    {
+      "@type": "Offer",
+      name: "Подписка PRO",
+      price: "9990",
+      priceCurrency: "RUB",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "9990",
+        priceCurrency: "RUB",
+        unitCode: "MON",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://kristall2002-art.github.io/gotovyplan/pro",
+    },
+  ],
+};
 
 export default function ProPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
+      <Script
+        id="ld-pro"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }}
+      />
       <span className="text-sm text-[var(--accent)] font-medium">PRO</span>
       <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">
         Конструктор для специалистов

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kristall2002-art.github.io/gotovyplan/sitemap.xml

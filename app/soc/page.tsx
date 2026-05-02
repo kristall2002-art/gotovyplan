@@ -1,8 +1,68 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { OrderForm } from "@/components/OrderForm";
+
+export const metadata: Metadata = {
+  title: "Бизнес-план для соцконтракта — до 350 000 ₽ от государства",
+  description:
+    "Бизнес-план под соцконтракт за 3 990 ₽ с гарантией одобрения комиссией соцзащиты. Готовность 48 часов, шаблон под регион, расчёт сметы и подбор ОКВЭД.",
+  keywords: [
+    "бизнес-план для соцконтракта",
+    "соцконтракт 350000",
+    "бизнес-план соцзащита",
+    "грант на бизнес от государства",
+    "бизнес-план ИП самозанятость",
+    "соцконтракт 2026",
+  ],
+  alternates: {
+    canonical: "/soc",
+  },
+  openGraph: {
+    title: "Бизнес-план под соцконтракт — до 350 000 ₽ от государства",
+    description:
+      "Готовый план под комиссию соцзащиты с гарантией одобрения. 3 990 ₽, готовность за 48 часов.",
+    url: "/soc",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "БП24",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Бизнес-план под соцконтракт — до 350 000 ₽",
+    description:
+      "Готовый план под комиссию соцзащиты с гарантией одобрения. 3 990 ₽, 48 часов.",
+  },
+};
+
+const offerJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Бизнес-план под соцконтракт",
+  description:
+    "Бизнес-план под требования соцзащиты с гарантией одобрения комиссией. Подбор ОКВЭД, смета расходов, подготовка к собеседованию.",
+  provider: {
+    "@type": "Organization",
+    name: "БП24",
+  },
+  areaServed: "RU",
+  offers: {
+    "@type": "Offer",
+    price: "3990",
+    priceCurrency: "RUB",
+    availability: "https://schema.org/InStock",
+    url: "https://kristall2002-art.github.io/gotovyplan/soc",
+  },
+};
 
 export default function SocPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
+      <Script
+        id="ld-soc"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }}
+      />
       <span className="text-sm text-[var(--accent)] font-medium">
         Госпрограмма
       </span>

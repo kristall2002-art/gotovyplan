@@ -36,3 +36,17 @@ export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: numb
   }
   return res.json();
 }
+
+export async function uploadAttachment(orderId: number, file: File): Promise<{ ok: true; attachment: string; size: number }> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API_BASE}/api/order/${orderId}/attachment`, {
+    method: "POST",
+    body: fd,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Файл не загрузился (${res.status}): ${text}`);
+  }
+  return res.json();
+}

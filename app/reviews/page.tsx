@@ -1,5 +1,39 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import { ReviewBubble, type Review } from "@/components/ReviewBubble";
+
+export const metadata: Metadata = {
+  title: "Отзывы клиентов о бизнес-планах онлайн",
+  description:
+    "Реальные отзывы клиентов БП24 из Telegram, ВКонтакте, Profi.ru и Avito. Средняя оценка 4.9/5, 2 400+ готовых планов, 94% возвращаются повторно.",
+  keywords: [
+    "отзывы бизнес-план",
+    "отзывы БП24",
+    "отзывы заказ бизнес-плана",
+    "бизнес-план отзывы клиентов",
+    "соцконтракт отзывы",
+    "бизнес-план для банка отзывы",
+  ],
+  alternates: {
+    canonical: "/reviews",
+  },
+  openGraph: {
+    title: "Отзывы клиентов о бизнес-планах БП24",
+    description:
+      "Реальные отзывы из Telegram, ВКонтакте, Profi.ru и Avito. 4.9/5, 2 400+ планов.",
+    url: "/reviews",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "БП24",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Отзывы клиентов о бизнес-планах БП24",
+    description:
+      "Реальные отзывы из Telegram, ВК, Profi.ru. Средняя оценка 4.9/5.",
+  },
+};
 
 const reviews: Review[] = [
   {
@@ -135,9 +169,45 @@ const reviews: Review[] = [
   },
 ];
 
+const reviewsJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Бизнес-планы БП24",
+  description:
+    "AI-сервис генерации бизнес-планов: быстрый расчёт, соцконтракт, полный план для банка, конструктор Pro.",
+  brand: {
+    "@type": "Brand",
+    name: "БП24",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: reviews.length,
+    bestRating: "5",
+    worstRating: "1",
+  },
+  review: reviews.map((r) => ({
+    "@type": "Review",
+    author: { "@type": "Person", name: r.name },
+    reviewBody: r.text,
+    reviewRating: {
+      "@type": "Rating",
+      ratingValue: "5",
+      bestRating: "5",
+      worstRating: "1",
+    },
+  })),
+};
+
 export default function ReviewsPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
+      <Script
+        id="ld-reviews"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsJsonLd) }}
+      />
       <div className="text-center mb-12 max-w-2xl mx-auto">
         <span className="px-3 py-1 mb-5 inline-block text-xs font-medium rounded-full border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--muted)]">
           Отзывы клиентов
