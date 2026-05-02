@@ -13,11 +13,18 @@ type SR = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
-  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  maxAlternatives: number;
+  onresult:
+    | ((e: {
+        resultIndex: number;
+        results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+      }) => void)
+    | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
+  abort: () => void;
 };
 
 declare global {
@@ -32,14 +39,18 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   const [supported, setSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+
   const recRef = useRef<SR | null>(null);
-  const baseTextRef = useRef<string>("");
+  // Текст до начала записи (то что уже было в textarea).
+  const prefixRef = useRef<string>("");
+  // Накопленный финальный распознанный текст за текущую сессию.
+  const finalRef = useRef<string>("");
+  // До какого индекса в e.results мы уже подняли final.
+  const finalIdxRef = useRef<number>(0);
 
   useEffect(() => {
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Ctor) {
-      setSupported(false);
-    }
+    if (!Ctor) setSupported(false);
   }, []);
 
   function start() {
@@ -49,37 +60,65 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
       setSupported(false);
       return;
     }
+
     const rec = new Ctor();
     rec.lang = "ru-RU";
     rec.continuous = true;
     rec.interimResults = true;
-    baseTextRef.current = value ? value + " " : "";
+    rec.maxAlternatives = 1;
+
+    prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
+    finalRef.current = "";
+    finalIdxRef.current = 0;
 
     rec.onresult = (e) => {
+      // Каждое событие приносит весь массив results с начала сессии.
+      // resultIndex — индекс первого результата, который изменился в этом событии.
+      // Считаем интерим из всего массива (последний интерим всегда актуален).
+      // Final аккумулируем только раз — отслеживая finalIdxRef.
       let interim = "";
-      let final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
-        else interim += t;
+      const len = e.results.length;
+      for (let i = 0; i < len; i++) {
+        const r = e.results[i];
+        const t = r[0].transcript;
+        if (r.isFinal) {
+          if (i >= finalIdxRef.current) {
+            finalRef.current += t;
+            finalIdxRef.current = i + 1;
+          }
+        } else {
+          interim += t;
+        }
       }
-      if (final) baseTextRef.current += final;
-      onChange((baseTextRef.current + interim).trimStart());
+      onChange(prefixRef.current + finalRef.current + interim);
     };
-    rec.onerror = (e) => {
-      setError(`Ошибка распознавания: ${e.error}`);
+
+    rec.onerror = (ev) => {
+      if (ev.error === "no-speech" || ev.error === "aborted") return;
+      setError(`Ошибка распознавания: ${ev.error}`);
+    };
+
+    rec.onend = () => {
+      // Очищаем хвостовой interim — оставляем только final.
+      onChange(prefixRef.current + finalRef.current);
       setRecording(false);
     };
-    rec.onend = () => setRecording(false);
 
     recRef.current = rec;
-    rec.start();
-    setRecording(true);
+    try {
+      rec.start();
+      setRecording(true);
+    } catch (err) {
+      setError(`Не удалось включить микрофон: ${(err as Error).message}`);
+    }
   }
 
   function stop() {
-    recRef.current?.stop();
+    const r = recRef.current;
     recRef.current = null;
+    if (r) {
+      r.stop();
+    }
     setRecording(false);
   }
 

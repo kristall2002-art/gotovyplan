@@ -36,7 +36,7 @@ export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6">
+    <div id="order-form" className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 scroll-mt-24">
       <div className="space-y-3 mb-4">
         <input
           type="text"

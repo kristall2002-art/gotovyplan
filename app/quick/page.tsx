@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
+import { NextStep } from "@/components/NextStep";
 import { OrderForm } from "@/components/OrderForm";
 
 export default function QuickPage() {
@@ -21,6 +22,31 @@ export default function QuickPage() {
       </p>
 
       <IdeaInput value={idea} onChange={setIdea} onFileChange={setFile} />
+
+      <NextStep
+        currentLabel="Получить быстрый анализ"
+        currentPrice="990 ₽"
+        others={[
+          {
+            href: "/soc",
+            title: "Соцконтракт",
+            price: "3 000 ₽",
+            hint: "Шаблон для соцзащиты на грант",
+          },
+          {
+            href: "/full",
+            title: "Полный бизнес-план",
+            price: "от 14 990 ₽",
+            hint: "30–40 страниц + Excel-финмодель",
+          },
+          {
+            href: "/pro",
+            title: "Конструктор Pro",
+            price: "от 9 990 ₽/мес",
+            hint: "Для консультантов, подписка",
+          },
+        ]}
+      />
 
       <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-8 mb-8">
         <h2 className="text-xl font-semibold mb-4">
