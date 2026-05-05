@@ -1,33 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Tag, Check } from "lucide-react";
+import { Tag, Check, Loader2 } from "lucide-react";
+import { createOrder, createPayment } from "@/lib/api";
 
 interface Props {
   buttonLabel: string;
   basePrice: number;
-  tariff: string;
+  tariff: "quick" | "soc" | "full" | "pro" | "other";
+  idea?: string;
 }
 
-export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
+const PROMOS: Record<string, number> = {
+  START25: 25,
+  LAUNCH50: 50,
+  TGCHANNEL: 30,
+};
+
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
+  const [name, setName] = useState("");
+  const [telegram, setTelegram] = useState("");
+  const [email, setEmail] = useState("");
   const [showPromo, setShowPromo] = useState(false);
   const [promoCode, setPromoCode] = useState("");
-  const [promoStatus, setPromoStatus] = useState<
-    "idle" | "applied" | "invalid"
-  >("idle");
+  const [promoStatus, setPromoStatus] = useState<"idle" | "applied" | "invalid">("idle");
   const [discountPct, setDiscountPct] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const finalPrice = Math.round(basePrice * (1 - discountPct / 100));
 
   function applyPromo() {
     const code = promoCode.trim().toUpperCase();
-    const valid: Record<string, number> = {
-      START25: 25,
-      LAUNCH50: 50,
-      TGCHANNEL: 30,
-    };
-    if (valid[code]) {
-      setDiscountPct(valid[code]);
+    if (PROMOS[code]) {
+      setDiscountPct(PROMOS[code]);
       setPromoStatus("applied");
     } else if (code.length > 0) {
       setPromoStatus("invalid");
@@ -35,22 +45,62 @@ export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
     }
   }
 
+  async function submit() {
+    setError(null);
+    if (!name.trim()) {
+      setError("Укажи имя — как к тебе обращаться.");
+      return;
+    }
+    if (!email.trim() || !isValidEmail(email)) {
+      setError("Email нужен для отправки чека и плана. Проверь формат.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const order = await createOrder({
+        tariff,
+        name: name.trim(),
+        telegram: telegram.trim() || undefined,
+        email: email.trim(),
+        promo_code: promoStatus === "applied" ? promoCode.trim().toUpperCase() : undefined,
+        discount_pct: discountPct,
+        base_price: basePrice,
+        final_price: finalPrice,
+        idea: idea?.trim() || undefined,
+      });
+      const payment = await createPayment(order.id);
+      window.location.href = payment.confirmation_url;
+    } catch (e) {
+      setError((e as Error).message);
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <div id="order-form" className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 scroll-mt-24">
+    <div
+      id="order-form"
+      className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 scroll-mt-24"
+    >
       <div className="space-y-3 mb-4">
         <input
           type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Ваше имя"
           className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
         <input
           type="text"
-          placeholder="Telegram (@username)"
+          value={telegram}
+          onChange={(e) => setTelegram(e.target.value)}
+          placeholder="Telegram (@username) — необязательно"
           className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
         <input
           type="email"
-          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email — обязательно для чека и плана"
           className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
 
@@ -97,20 +147,52 @@ export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
         )}
       </div>
 
+      {error && (
+        <div className="mb-3 px-3 py-2 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm">
+          {error}
+        </div>
+      )}
+
       <button
         type="button"
-        className="w-full px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity"
+        onClick={submit}
+        disabled={submitting}
+        className="w-full px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
       >
-        {buttonLabel} {finalPrice.toLocaleString("ru-RU")} ₽
-        {discountPct > 0 && (
-          <span className="ml-2 text-sm opacity-80 line-through">
-            {basePrice.toLocaleString("ru-RU")} ₽
-          </span>
+        {submitting ? (
+          <>
+            <Loader2 size={18} className="animate-spin" /> Готовим оплату…
+          </>
+        ) : (
+          <>
+            {buttonLabel} {finalPrice.toLocaleString("ru-RU")} ₽
+            {discountPct > 0 && (
+              <span className="ml-2 text-sm opacity-80 line-through">
+                {basePrice.toLocaleString("ru-RU")} ₽
+              </span>
+            )}
+          </>
         )}
       </button>
 
       <p className="text-xs text-[var(--muted)] text-center mt-3">
-        💡 Подпишись на{" "}
+        Оплата через ЮKassa: карта, СБП, SberPay, YandexPay. Чек на email.
+      </p>
+
+      <p className="text-xs text-[var(--muted)] text-center mt-2">
+        Нажимая кнопку, ты подтверждаешь согласие с{" "}
+        <a href="/offer" className="underline hover:text-[var(--accent)]">
+          офертой
+        </a>{" "}
+        и{" "}
+        <a href="/privacy" className="underline hover:text-[var(--accent)]">
+          обработкой персональных данных
+        </a>
+        .
+      </p>
+
+      <p className="text-xs text-[var(--muted)] text-center mt-3">
+        Подпишись на{" "}
         <a
           href="https://t.me/+NxIFCQBuxsA3Mzdi"
           target="_blank"
@@ -119,10 +201,8 @@ export function OrderForm({ buttonLabel, basePrice, tariff }: Props) {
         >
           Telegram-канал
         </a>{" "}
-        — там разыгрываем промокоды со скидками до 100%
+        — там разыгрываем промокоды со скидками до 100%.
       </p>
-
-      <input type="hidden" name="tariff" value={tariff} />
     </div>
   );
 }

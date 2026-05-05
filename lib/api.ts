@@ -50,3 +50,14 @@ export async function uploadAttachment(orderId: number, file: File): Promise<{ o
   }
   return res.json();
 }
+
+export async function createPayment(orderId: number): Promise<{ ok: true; confirmation_url: string; payment_id: string; amount: number }> {
+  const res = await fetch(`${API_BASE}/api/order/${orderId}/payment`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Ошибка оплаты (${res.status}): ${text}`);
+  }
+  return res.json();
+}
