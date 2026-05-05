@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { OrderForm } from "@/components/OrderForm";
+import { PlanPreview } from "@/components/PlanPreview";
 
 export const metadata: Metadata = {
   title: "Полный бизнес-план для банка с финмоделью Excel",
@@ -117,6 +118,8 @@ export default function FullPage() {
       </div>
 
       <OrderForm tariff="full" basePrice={14990} buttonLabel="Заказать полный план за" />
+
+      <PlanPreview tier="full" />
     </div>
   );
 }

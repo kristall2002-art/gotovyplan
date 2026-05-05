@@ -4,6 +4,7 @@ import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
 import { NextStep } from "@/components/NextStep";
 import { OrderForm } from "@/components/OrderForm";
+import { PlanPreview } from "@/components/PlanPreview";
 
 export default function QuickPage() {
   const [idea, setIdea] = useState("");
@@ -79,7 +80,9 @@ export default function QuickPage() {
         </p>
       </div>
 
-      <OrderForm tariff="quick" basePrice={990} buttonLabel="Заказать за" />
+      <OrderForm tariff="quick" basePrice={990} buttonLabel="Заказать за" idea={idea} />
+
+      <PlanPreview tier="quick" />
     </div>
   );
 }

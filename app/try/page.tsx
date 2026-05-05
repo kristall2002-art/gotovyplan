@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
 import { ContactPicker, type ContactType } from "@/components/ContactPicker";
+import { PlanPreview } from "@/components/PlanPreview";
 import { createOrder, uploadAttachment } from "@/lib/api";
 import { Gift, MapPin, Scale, AlertTriangle, Loader2 } from "lucide-react";
 
@@ -239,6 +240,8 @@ export default function TryPage() {
         </a>
         .
       </p>
+
+      <PlanPreview tier="try" />
 
       <div className="mt-12 pt-8 border-t border-[var(--border)]">
         <p className="text-sm text-[var(--muted)] mb-4">

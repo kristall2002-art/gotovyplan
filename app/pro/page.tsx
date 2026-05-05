@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { OrderForm } from "@/components/OrderForm";
+import { PlanPreview } from "@/components/PlanPreview";
 
 export const metadata: Metadata = {
   title: "Конструктор бизнес-планов Pro для консультантов",
@@ -130,6 +131,8 @@ export default function ProPage() {
       </div>
 
       <OrderForm tariff="pro" basePrice={4990} buttonLabel="Начать сборку за" />
+
+      <PlanPreview tier="pro" />
     </div>
   );
 }
