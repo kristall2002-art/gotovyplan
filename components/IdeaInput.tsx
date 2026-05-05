@@ -46,14 +46,12 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   const finalRef = useRef<string>("");
   const finalIdxRef = useRef<number>(0);
   const restartTimerRef = useRef<number | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) setSupported(false);
     return () => {
       if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
-      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -88,8 +86,23 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     };
 
     rec.onerror = (ev) => {
-      if (ev.error === "aborted") return;
-      if (ev.error === "no-speech" || ev.error === "audio-capture") return;
+      if (ev.error === "aborted" || ev.error === "no-speech") return;
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+        wantRef.current = false;
+        setError("Доступ к микрофону запрещён. Разреши в настройках сайта и перезагрузи страницу.");
+        setRecording(false);
+        return;
+      }
+      if (ev.error === "audio-capture") {
+        wantRef.current = false;
+        setError("Микрофон не найден. Проверь, подключён ли он.");
+        setRecording(false);
+        return;
+      }
+      if (ev.error === "network") {
+        setError("Нет связи с сервером распознавания. Проверь интернет.");
+        return;
+      }
       setError(`Ошибка распознавания: ${ev.error}`);
     };
 
@@ -122,23 +135,10 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     return rec;
   }
 
-  async function start() {
+  function start() {
     setError(null);
     if (!window.isSecureContext && location.hostname !== "localhost") {
       setError("Микрофон работает только на HTTPS-сайтах.");
-      return;
-    }
-
-    try {
-      streamRef.current = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-    } catch (err) {
-      setError(`Нет доступа к микрофону: ${(err as Error).message}`);
       return;
     }
 
@@ -167,8 +167,6 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     const r = recRef.current;
     recRef.current = null;
     if (r) r.stop();
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
     setRecording(false);
   }
 
