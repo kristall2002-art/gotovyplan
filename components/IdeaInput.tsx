@@ -43,8 +43,6 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   const recRef = useRef<SR | null>(null);
   const wantRef = useRef<boolean>(false);
   const prefixRef = useRef<string>("");
-  const finalRef = useRef<string>("");
-  const finalIdxRef = useRef<number>(0);
   const restartTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -63,26 +61,18 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     }
     const rec = new Ctor();
     rec.lang = "ru-RU";
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
     rec.onresult = (e) => {
-      let interim = "";
-      const len = e.results.length;
-      for (let i = 0; i < len; i++) {
-        const r = e.results[i];
-        const t = r[0].transcript;
-        if (r.isFinal) {
-          if (i >= finalIdxRef.current) {
-            finalRef.current += t;
-            finalIdxRef.current = i + 1;
-          }
-        } else {
-          interim += t;
-        }
+      // В continuous-режиме e.results содержит весь массив с начала сессии.
+      // Берём целиком — без ручной аккумуляции, без рисков пропуска и дублей.
+      let text = "";
+      for (let i = 0; i < e.results.length; i++) {
+        text += e.results[i][0].transcript;
       }
-      onChange(prefixRef.current + finalRef.current + interim);
+      onChange(prefixRef.current + text);
     };
 
     rec.onerror = (ev) => {
@@ -107,26 +97,23 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     };
 
     rec.onend = () => {
-      onChange(prefixRef.current + finalRef.current);
-      finalIdxRef.current = 0;
+      // Continuous-режим иногда сам закрывается на длинных паузах — авто-перезапуск
+      // с фрешем prefixRef, чтобы текущий распознанный текст стал «уже введённым».
       if (wantRef.current) {
+        const currentValue = (prefixRef.current ? prefixRef.current : "") + value;
+        prefixRef.current = currentValue ? currentValue.replace(/\s+$/, "") + " " : "";
         restartTimerRef.current = window.setTimeout(() => {
           if (!wantRef.current) return;
-          try {
-            rec.start();
-          } catch {
-            // SR throws if already started/stopping — пробуем заново через тик.
-            restartTimerRef.current = window.setTimeout(() => {
-              if (wantRef.current) {
-                const fresh = buildRecognition();
-                if (fresh) {
-                  recRef.current = fresh;
-                  fresh.start();
-                }
-              }
-            }, 100);
+          const fresh = buildRecognition();
+          if (fresh) {
+            recRef.current = fresh;
+            try {
+              fresh.start();
+            } catch {
+              // ignore double-start
+            }
           }
-        }, 50);
+        }, 200);
       } else {
         setRecording(false);
       }
@@ -143,8 +130,6 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     }
 
     prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
-    finalRef.current = "";
-    finalIdxRef.current = 0;
     wantRef.current = true;
 
     const rec = buildRecognition();
