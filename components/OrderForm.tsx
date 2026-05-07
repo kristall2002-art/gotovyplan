@@ -17,6 +17,8 @@ const PROMOS: Record<string, number> = {
   TGCHANNEL: 30,
 };
 
+const OWNER_CODE = "BP24-OWNER";
+
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
@@ -36,6 +38,11 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
 
   function applyPromo() {
     const code = promoCode.trim().toUpperCase();
+    if (code === OWNER_CODE) {
+      setDiscountPct(100);
+      setPromoStatus("applied");
+      return;
+    }
     if (PROMOS[code]) {
       setDiscountPct(PROMOS[code]);
       setPromoStatus("applied");
@@ -55,6 +62,9 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
       setError("Email нужен для отправки чека и плана. Проверь формат.");
       return;
     }
+    const code = promoStatus === "applied" ? promoCode.trim().toUpperCase() : undefined;
+    const isOwner = code === OWNER_CODE;
+
     setSubmitting(true);
     try {
       const order = await createOrder({
@@ -62,12 +72,17 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
         name: name.trim(),
         telegram: telegram.trim() || undefined,
         email: email.trim(),
-        promo_code: promoStatus === "applied" ? promoCode.trim().toUpperCase() : undefined,
+        promo_code: code,
         discount_pct: discountPct,
         base_price: basePrice,
-        final_price: finalPrice,
+        final_price: isOwner ? 0 : finalPrice,
         idea: idea?.trim() || undefined,
+        notes: isOwner ? "owner test order — bypass payment" : undefined,
       });
+      if (isOwner) {
+        window.location.href = "/paid";
+        return;
+      }
       const payment = await createPayment(order.id);
       window.location.href = payment.confirmation_url;
     } catch (e) {
