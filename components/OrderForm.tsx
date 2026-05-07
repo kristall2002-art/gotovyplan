@@ -62,8 +62,23 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
       setError("Email нужен для отправки чека и плана. Проверь формат.");
       return;
     }
-    const code = promoStatus === "applied" ? promoCode.trim().toUpperCase() : undefined;
+    // Авто-применение если код введён но забыли нажать «Применить»
+    const typedCode = promoCode.trim().toUpperCase();
+    let effectiveDiscount = discountPct;
+    if (promoStatus !== "applied" && typedCode) {
+      if (typedCode === OWNER_CODE) {
+        effectiveDiscount = 100;
+        setDiscountPct(100);
+        setPromoStatus("applied");
+      } else if (PROMOS[typedCode]) {
+        effectiveDiscount = PROMOS[typedCode];
+        setDiscountPct(PROMOS[typedCode]);
+        setPromoStatus("applied");
+      }
+    }
+    const code = (promoStatus === "applied" || effectiveDiscount > 0) ? typedCode : undefined;
     const isOwner = code === OWNER_CODE;
+    const effectiveFinalPrice = Math.round(basePrice * (1 - effectiveDiscount / 100));
 
     setSubmitting(true);
     try {
@@ -73,9 +88,9 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
         telegram: telegram.trim() || undefined,
         email: email.trim(),
         promo_code: code,
-        discount_pct: discountPct,
+        discount_pct: effectiveDiscount,
         base_price: basePrice,
-        final_price: isOwner ? 0 : finalPrice,
+        final_price: isOwner ? 0 : effectiveFinalPrice,
         idea: idea?.trim() || undefined,
         notes: isOwner ? "owner test order — bypass payment" : undefined,
       });
@@ -136,6 +151,13 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
                 onChange={(e) => {
                   setPromoCode(e.target.value);
                   setPromoStatus("idle");
+                }}
+                onBlur={applyPromo}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    applyPromo();
+                  }
                 }}
                 placeholder="ПРОМОКОД"
                 className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] uppercase tracking-wider text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)]"
