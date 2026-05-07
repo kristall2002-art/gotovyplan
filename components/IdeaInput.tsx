@@ -43,6 +43,7 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
   const recRef = useRef<SR | null>(null);
   const wantRef = useRef<boolean>(false);
   const prefixRef = useRef<string>("");
+  const sessionTextRef = useRef<string>("");
   const restartTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -66,12 +67,11 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     rec.maxAlternatives = 1;
 
     rec.onresult = (e) => {
-      // В continuous-режиме e.results содержит весь массив с начала сессии.
-      // Берём целиком — без ручной аккумуляции, без рисков пропуска и дублей.
       let text = "";
       for (let i = 0; i < e.results.length; i++) {
         text += e.results[i][0].transcript;
       }
+      sessionTextRef.current = text;
       onChange(prefixRef.current + text);
     };
 
@@ -97,11 +97,12 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     };
 
     rec.onend = () => {
-      // Continuous-режим иногда сам закрывается на длинных паузах — авто-перезапуск
-      // с фрешем prefixRef, чтобы текущий распознанный текст стал «уже введённым».
+      if (sessionTextRef.current) {
+        const merged = prefixRef.current + sessionTextRef.current;
+        prefixRef.current = merged.replace(/\s+$/, "") + " ";
+        sessionTextRef.current = "";
+      }
       if (wantRef.current) {
-        const currentValue = (prefixRef.current ? prefixRef.current : "") + value;
-        prefixRef.current = currentValue ? currentValue.replace(/\s+$/, "") + " " : "";
         restartTimerRef.current = window.setTimeout(() => {
           if (!wantRef.current) return;
           const fresh = buildRecognition();
@@ -130,6 +131,7 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
     }
 
     prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
+    sessionTextRef.current = "";
     wantRef.current = true;
 
     const rec = buildRecognition();
