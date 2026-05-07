@@ -11,6 +11,7 @@ export interface OrderPayload {
   base_price?: number;
   final_price?: number;
   idea?: string;
+  business_type?: string;
   region?: string;
   city?: string;
   address?: string;
@@ -19,7 +20,7 @@ export interface OrderPayload {
   notes?: string;
 }
 
-export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: number; created_at: string }> {
+export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: number; created_at: string; customer_token: string }> {
   const body: Record<string, unknown> = { source: "site", ...p };
   Object.keys(body).forEach((k) => {
     const v = body[k];

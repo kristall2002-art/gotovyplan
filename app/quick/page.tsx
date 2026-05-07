@@ -5,10 +5,16 @@ import { IdeaInput } from "@/components/IdeaInput";
 import { NextStep } from "@/components/NextStep";
 import { OrderForm } from "@/components/OrderForm";
 import { PlanPreview } from "@/components/PlanPreview";
+import { BusinessContext } from "@/components/BusinessContext";
 
 export default function QuickPage() {
   const [idea, setIdea] = useState("");
   const [, setFile] = useState<File | null>(null);
+  const [businessType, setBusinessType] = useState("");
+  const [region, setRegion] = useState("");
+  const [city, setCity] = useState("");
+
+  const contextValid = Boolean(businessType && region.trim() && city.trim());
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -21,6 +27,15 @@ export default function QuickPage() {
         понять, стоит ли вообще влезать. За 990 ₽ получишь реальный анализ
         своей идеи, чтобы решить — двигаться дальше или нет.
       </p>
+
+      <BusinessContext
+        businessType={businessType}
+        region={region}
+        city={city}
+        onBusinessTypeChange={setBusinessType}
+        onRegionChange={setRegion}
+        onCityChange={setCity}
+      />
 
       <IdeaInput value={idea} onChange={setIdea} onFileChange={setFile} />
 
@@ -80,7 +95,16 @@ export default function QuickPage() {
         </p>
       </div>
 
-      <OrderForm tariff="quick" basePrice={990} buttonLabel="Заказать за" idea={idea} />
+      <OrderForm
+        tariff="quick"
+        basePrice={990}
+        buttonLabel="Заказать за"
+        idea={idea}
+        businessType={businessType}
+        region={region}
+        city={city}
+        contextValid={contextValid}
+      />
 
       <PlanPreview tier="quick" />
     </div>

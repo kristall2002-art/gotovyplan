@@ -194,7 +194,7 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={12}
-        placeholder="Опиши: что хочешь делать, в каком городе, какой бюджет, кто покупатель…"
+        placeholder="Опиши: что хочешь делать, кто покупатель, чем отличаешься от конкурентов, есть ли уже опыт в этой нише…"
         className="w-full px-4 py-3 mb-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-y min-h-[320px]"
       />
 

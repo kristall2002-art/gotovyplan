@@ -4,6 +4,7 @@ import { useState } from "react";
 import { IdeaInput } from "@/components/IdeaInput";
 import { ContactPicker, type ContactType } from "@/components/ContactPicker";
 import { PlanPreview } from "@/components/PlanPreview";
+import { BusinessContext } from "@/components/BusinessContext";
 import { createOrder, uploadAttachment } from "@/lib/api";
 import { Gift, MapPin, Scale, AlertTriangle, Loader2 } from "lucide-react";
 
@@ -18,6 +19,9 @@ function isValidTelegram(v: string) {
 export default function TryPage() {
   const [idea, setIdea] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [businessType, setBusinessType] = useState("");
+  const [region, setRegion] = useState("");
+  const [city, setCity] = useState("");
   const [contactType, setContactType] = useState<ContactType>("telegram");
   const [contactValue, setContactValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -27,6 +31,18 @@ export default function TryPage() {
   async function submit() {
     setError(null);
 
+    if (!businessType) {
+      setError("Выбери тип бизнеса — это нужно для расчёта.");
+      return;
+    }
+    if (!region.trim()) {
+      setError("Укажи регион — без него не получится найти конкурентов и налоги.");
+      return;
+    }
+    if (!city.trim()) {
+      setError("Укажи город — нужен для карты конкурентов и расчёта аренды.");
+      return;
+    }
     if (!idea.trim() || idea.trim().length < 10) {
       setError("Расскажи идею подробнее — минимум 10 символов.");
       return;
@@ -62,6 +78,9 @@ export default function TryPage() {
         idea: idea.trim(),
         telegram: tg,
         email: em,
+        business_type: businessType,
+        region: region.trim(),
+        city: city.trim(),
         base_price: 0,
         final_price: 0,
       });
@@ -195,6 +214,15 @@ export default function TryPage() {
           Excel-финмодели, маркетинг-плана. Это всё в платных тарифах от 990 ₽.
         </div>
       </div>
+
+      <BusinessContext
+        businessType={businessType}
+        region={region}
+        city={city}
+        onBusinessTypeChange={setBusinessType}
+        onRegionChange={setRegion}
+        onCityChange={setCity}
+      />
 
       <IdeaInput value={idea} onChange={setIdea} onFileChange={setFile} />
 

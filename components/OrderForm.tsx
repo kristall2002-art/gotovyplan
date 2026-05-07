@@ -9,6 +9,10 @@ interface Props {
   basePrice: number;
   tariff: "quick" | "soc" | "full" | "pro" | "other";
   idea?: string;
+  businessType?: string;
+  region?: string;
+  city?: string;
+  contextValid?: boolean;
 }
 
 const PROMOS: Record<string, number> = {
@@ -23,7 +27,16 @@ function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
+export function OrderForm({
+  buttonLabel,
+  basePrice,
+  tariff,
+  idea,
+  businessType,
+  region,
+  city,
+  contextValid = true,
+}: Props) {
   const [name, setName] = useState("");
   const [telegram, setTelegram] = useState("");
   const [email, setEmail] = useState("");
@@ -54,6 +67,10 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
 
   async function submit() {
     setError(null);
+    if (!contextValid) {
+      setError("Заполни тип бизнеса, регион и город — без этого не получится посчитать цифры.");
+      return;
+    }
     if (!name.trim()) {
       setError("Укажи имя — как к тебе обращаться.");
       return;
@@ -92,6 +109,9 @@ export function OrderForm({ buttonLabel, basePrice, tariff, idea }: Props) {
         base_price: basePrice,
         final_price: isOwner ? 0 : effectiveFinalPrice,
         idea: idea?.trim() || undefined,
+        business_type: businessType || undefined,
+        region: region?.trim() || undefined,
+        city: city?.trim() || undefined,
         notes: isOwner ? "owner test order — bypass payment" : undefined,
       });
       if (isOwner) {
