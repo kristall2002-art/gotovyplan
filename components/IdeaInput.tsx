@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, Paperclip, X } from "lucide-react";
+import { useState } from "react";
+import { Paperclip, X } from "lucide-react";
+import { WhisperRecorder } from "@/components/WhisperRecorder";
 
 interface Props {
   value: string;
@@ -9,152 +10,14 @@ interface Props {
   onFileChange?: (file: File | null) => void;
 }
 
-type SR = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  onresult:
-    | ((e: {
-        resultIndex: number;
-        results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
-      }) => void)
-    | null;
-  onerror: ((e: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
-
-declare global {
-  interface Window {
-    SpeechRecognition?: { new (): SR };
-    webkitSpeechRecognition?: { new (): SR };
-  }
-}
-
 export function IdeaInput({ value, onChange, onFileChange }: Props) {
-  const [recording, setRecording] = useState(false);
-  const [supported, setSupported] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  const recRef = useRef<SR | null>(null);
-  const wantRef = useRef<boolean>(false);
-  const prefixRef = useRef<string>("");
-  const sessionTextRef = useRef<string>("");
-  const restartTimerRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Ctor) setSupported(false);
-    return () => {
-      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
-    };
-  }, []);
-
-  function buildRecognition(): SR | null {
-    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Ctor) {
-      setSupported(false);
-      return null;
-    }
-    const rec = new Ctor();
-    rec.lang = "ru-RU";
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.maxAlternatives = 1;
-
-    rec.onresult = (e) => {
-      let text = "";
-      for (let i = 0; i < e.results.length; i++) {
-        text += e.results[i][0].transcript;
-      }
-      sessionTextRef.current = text;
-      onChange(prefixRef.current + text);
-    };
-
-    rec.onerror = (ev) => {
-      if (ev.error === "aborted" || ev.error === "no-speech") return;
-      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
-        wantRef.current = false;
-        setError("Доступ к микрофону запрещён. Разреши в настройках сайта и перезагрузи страницу.");
-        setRecording(false);
-        return;
-      }
-      if (ev.error === "audio-capture") {
-        wantRef.current = false;
-        setError("Микрофон не найден. Проверь, подключён ли он.");
-        setRecording(false);
-        return;
-      }
-      if (ev.error === "network") {
-        setError("Нет связи с сервером распознавания. Проверь интернет.");
-        return;
-      }
-      setError(`Ошибка распознавания: ${ev.error}`);
-    };
-
-    rec.onend = () => {
-      if (sessionTextRef.current) {
-        const merged = prefixRef.current + sessionTextRef.current;
-        prefixRef.current = merged.replace(/\s+$/, "") + " ";
-        sessionTextRef.current = "";
-      }
-      if (wantRef.current) {
-        restartTimerRef.current = window.setTimeout(() => {
-          if (!wantRef.current) return;
-          const fresh = buildRecognition();
-          if (fresh) {
-            recRef.current = fresh;
-            try {
-              fresh.start();
-            } catch {
-              // ignore double-start
-            }
-          }
-        }, 200);
-      } else {
-        setRecording(false);
-      }
-    };
-
-    return rec;
-  }
-
-  function start() {
-    setError(null);
-    if (!window.isSecureContext && location.hostname !== "localhost") {
-      setError("Микрофон работает только на HTTPS-сайтах.");
-      return;
-    }
-
-    prefixRef.current = value ? value.replace(/\s+$/, "") + " " : "";
-    sessionTextRef.current = "";
-    wantRef.current = true;
-
-    const rec = buildRecognition();
-    if (!rec) return;
-    recRef.current = rec;
-    try {
-      rec.start();
-      setRecording(true);
-    } catch (err) {
-      setError(`Не удалось включить микрофон: ${(err as Error).message}`);
-    }
-  }
-
-  function stop() {
-    wantRef.current = false;
-    if (restartTimerRef.current) {
-      clearTimeout(restartTimerRef.current);
-      restartTimerRef.current = null;
-    }
-    const r = recRef.current;
-    recRef.current = null;
-    if (r) r.stop();
-    setRecording(false);
+  function appendTranscript(text: string) {
+    const cleaned = text.trim();
+    if (!cleaned) return;
+    const base = value.trim();
+    onChange(base ? `${base} ${cleaned}` : cleaned);
   }
 
   function onFile(f: File | null) {
@@ -167,27 +30,11 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
       <h3 className="text-lg font-semibold mb-2">Расскажи свою идею</h3>
       <p className="text-sm text-[var(--muted)] mb-4">
         Нажми на микрофон и наговори, или напиши текстом, или приложи файл.
+        Распознавание работает прямо в твоём браузере — аудио никуда не отправляется.
       </p>
 
       <div className="flex justify-center mb-4">
-        <button
-          type="button"
-          onClick={recording ? stop : start}
-          disabled={!supported}
-          aria-label={recording ? "Остановить запись" : "Начать запись"}
-          className={`w-20 h-20 rounded-full grid place-items-center text-white transition-all ${
-            recording
-              ? "bg-rose-500 hover:bg-rose-600 animate-pulse"
-              : "bg-[var(--accent)] hover:opacity-90 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-          }`}
-          style={
-            recording
-              ? { boxShadow: "0 0 30px rgba(244,63,94,0.55)" }
-              : { boxShadow: "0 0 25px rgba(14,165,233,0.4)" }
-          }
-        >
-          {recording ? <MicOff size={32} /> : <Mic size={32} />}
-        </button>
+        <WhisperRecorder onText={appendTranscript} />
       </div>
 
       <textarea
@@ -223,18 +70,6 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
           </span>
         )}
       </div>
-
-      {recording && (
-        <p className="mt-3 text-xs text-rose-500">
-          ● Запись идёт. Говори в микрофон. Текст появляется ниже.
-        </p>
-      )}
-      {!supported && (
-        <p className="mt-3 text-xs text-amber-500">
-          Голосовой ввод не поддерживается в этом браузере. Используй Chrome / Edge / Yandex.Browser, или просто напиши текстом.
-        </p>
-      )}
-      {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
     </div>
   );
 }
