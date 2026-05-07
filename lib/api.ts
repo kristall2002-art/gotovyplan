@@ -62,3 +62,35 @@ export async function createPayment(orderId: number): Promise<{ ok: true; confir
   }
   return res.json();
 }
+
+export async function upgradeRequest(orderId: number, email: string, targetTier: string): Promise<{ ok: true }> {
+  const res = await fetch(`${API_BASE}/api/upgrade/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order_id: orderId, email, target_tier: targetTier }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+export async function upgradeVerify(orderId: number, code: string, targetTier: string): Promise<{
+  ok: true;
+  confirmation_url: string;
+  amount: number;
+  from_tier: string;
+  to_tier: string;
+}> {
+  const res = await fetch(`${API_BASE}/api/upgrade/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order_id: orderId, code, target_tier: targetTier }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${res.status}: ${text}`);
+  }
+  return res.json();
+}
