@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { Briefcase, MapPin } from "lucide-react";
 import { BUSINESS_TYPES, RUSSIA_REGIONS } from "@/lib/regions";
+import { Combobox } from "@/components/Combobox";
+import { loadCities, citiesByRegion, type City } from "@/lib/cities";
 
 interface Props {
   businessType: string;
@@ -21,6 +24,19 @@ export function BusinessContext({
   onCityChange,
 }: Props) {
   const selectedHint = BUSINESS_TYPES.find((t) => t.value === businessType)?.hint;
+  const [cities, setCities] = useState<City[] | null>(null);
+
+  useEffect(() => {
+    loadCities().then(setCities).catch(() => setCities([]));
+  }, []);
+
+  const cityOptions = useMemo(() => {
+    if (!cities || !region) return [];
+    return citiesByRegion(cities, region).map((c) => c.n);
+  }, [cities, region]);
+
+  const regionIsKnown = RUSSIA_REGIONS.includes(region);
+  const cityListReady = cities !== null;
 
   return (
     <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 mb-6">
@@ -66,20 +82,16 @@ export function BusinessContext({
               <MapPin size={14} className="text-[var(--accent)]" />
               Регион
             </label>
-            <input
-              type="text"
-              list="russia-regions"
+            <Combobox
               value={region}
-              onChange={(e) => onRegionChange(e.target.value)}
+              onChange={(v) => {
+                onRegionChange(v);
+                if (v !== region) onCityChange("");
+              }}
+              options={RUSSIA_REGIONS}
               placeholder="Начни вводить — Москва, Рязанская…"
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              autoComplete="off"
+              emptyText="Не нашли регион — впишем как есть"
             />
-            <datalist id="russia-regions">
-              {RUSSIA_REGIONS.map((r) => (
-                <option key={r} value={r} />
-              ))}
-            </datalist>
           </div>
 
           <div>
@@ -87,13 +99,25 @@ export function BusinessContext({
               <MapPin size={14} className="text-[var(--accent)]" />
               Город / населённый пункт
             </label>
-            <input
-              type="text"
+            <Combobox
               value={city}
-              onChange={(e) => onCityChange(e.target.value)}
-              placeholder="Например, Рязань"
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--muted-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              autoComplete="off"
+              onChange={onCityChange}
+              options={cityOptions}
+              placeholder={
+                !region
+                  ? "Сначала выбери регион"
+                  : !regionIsKnown
+                  ? "Город — текстом"
+                  : !cityListReady
+                  ? "Грузим список городов…"
+                  : "Например, Рязань"
+              }
+              emptyText={
+                regionIsKnown && cityListReady && cityOptions.length === 0
+                  ? "В этом регионе нет городов в нашей базе"
+                  : "Города нет в списке — впишем как есть (учтём при анализе)"
+              }
+              disabled={!region}
             />
           </div>
         </div>
