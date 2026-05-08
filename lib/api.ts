@@ -76,6 +76,17 @@ export async function upgradeRequest(orderId: number, email: string, targetTier:
   return res.json();
 }
 
+export async function transcribeAudio(blob: Blob): Promise<{ text: string }> {
+  const fd = new FormData();
+  fd.append("audio", blob, "voice.webm");
+  const res = await fetch(`${API_BASE}/api/transcribe`, { method: "POST", body: fd });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
 export async function upgradeVerify(orderId: number, code: string, targetTier: string): Promise<{
   ok: true;
   confirmation_url: string;

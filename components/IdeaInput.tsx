@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Paperclip, X } from "lucide-react";
-import { WhisperRecorder } from "@/components/WhisperRecorder";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 
 interface Props {
   value: string;
@@ -30,11 +30,11 @@ export function IdeaInput({ value, onChange, onFileChange }: Props) {
       <h3 className="text-lg font-semibold mb-2">Расскажи свою идею</h3>
       <p className="text-sm text-[var(--muted)] mb-4">
         Нажми на микрофон и наговори, или напиши текстом, или приложи файл.
-        Распознавание работает прямо в твоём браузере — аудио никуда не отправляется.
+        Аудио используется только для расшифровки и сразу удаляется.
       </p>
 
       <div className="flex justify-center mb-4">
-        <WhisperRecorder onText={appendTranscript} />
+        <VoiceRecorder onText={appendTranscript} />
       </div>
 
       <textarea
