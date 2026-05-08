@@ -27,6 +27,18 @@ jobs:
 
       - run: npm ci
 
+      - name: Download Whisper-tiny fp16 model
+        run: |
+          mkdir -p public/whisper/Xenova/whisper-tiny/onnx
+          cd public/whisper/Xenova/whisper-tiny
+          for f in tokenizer.json tokenizer_config.json config.json generation_config.json preprocessor_config.json; do
+            curl -fsSL -o "$f" "https://huggingface.co/Xenova/whisper-tiny/resolve/main/$f"
+          done
+          for f in encoder_model_fp16.onnx decoder_model_merged_fp16.onnx decoder_model_fp16.onnx decoder_with_past_model_fp16.onnx; do
+            curl -fsSL -o "onnx/$f" "https://huggingface.co/Xenova/whisper-tiny/resolve/main/onnx/$f"
+          done
+          du -sh .
+
       - run: npm run build
 
       - run: touch ./out/.nojekyll

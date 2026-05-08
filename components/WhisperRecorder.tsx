@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Download, Loader2, AlertTriangle } from "lucide-react";
 
-const MODEL = "Xenova/whisper-base";
+const MODEL = "Xenova/whisper-tiny";
+const MODEL_DTYPE = "fp16";
+const LOCAL_MODEL_PATH = "/gotovyplan/whisper/";
 const TARGET_SR = 16000;
 
 type Phase = "idle" | "loading" | "ready" | "recording" | "transcribing" | "error";
@@ -46,11 +48,18 @@ export function WhisperRecorder({ onText, disabled }: Props) {
 
     const tx = (await import("@huggingface/transformers")) as unknown as {
       pipeline: (task: string, model: string, opts: Record<string, unknown>) => Promise<unknown>;
-      env: { allowLocalModels: boolean };
+      env: {
+        allowLocalModels: boolean;
+        allowRemoteModels: boolean;
+        localModelPath: string;
+      };
     };
-    tx.env.allowLocalModels = false;
+    tx.env.allowLocalModels = true;
+    tx.env.allowRemoteModels = false;
+    tx.env.localModelPath = LOCAL_MODEL_PATH;
 
     transcriberRef.current = await tx.pipeline("automatic-speech-recognition", MODEL, {
+      dtype: MODEL_DTYPE,
       progress_callback: (data: ProgressEvent) => {
         if (data.status === "progress") {
           if (typeof data.progress === "number") {
@@ -186,7 +195,7 @@ export function WhisperRecorder({ onText, disabled }: Props) {
       {isLoading && (
         <div className="w-full max-w-md">
           <p className="text-xs text-center text-[var(--muted)] mb-2">
-            {progressLabel || "Загружаем модель распознавания (один раз ≈140 МБ)"}
+            {progressLabel || "Загружаем модель распознавания (один раз ≈190 МБ)"}
           </p>
           <div className="w-full h-2 rounded-full bg-[var(--muted-bg)] overflow-hidden">
             <div
