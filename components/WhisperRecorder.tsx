@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Download, Loader2, AlertTriangle } from "lucide-react";
 
 const MODEL = "Xenova/whisper-tiny";
-const MODEL_DTYPE = "fp16";
+const MODEL_DTYPE = "q8";
 const LOCAL_MODEL_PATH = "/gotovyplan/whisper/";
 const TARGET_SR = 16000;
 
@@ -195,7 +195,7 @@ export function WhisperRecorder({ onText, disabled }: Props) {
       {isLoading && (
         <div className="w-full max-w-md">
           <p className="text-xs text-center text-[var(--muted)] mb-2">
-            {progressLabel || "Загружаем модель распознавания (один раз ≈190 МБ)"}
+            {progressLabel || "Загружаем модель распознавания (один раз ≈100 МБ)"}
           </p>
           <div className="w-full h-2 rounded-full bg-[var(--muted-bg)] overflow-hidden">
             <div
