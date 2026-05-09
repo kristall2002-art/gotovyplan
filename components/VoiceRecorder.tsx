@@ -18,16 +18,39 @@ export function VoiceRecorder({ onText, disabled }: Props) {
   const mediaRecRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const isStartingRef = useRef<boolean>(false);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+        errorTimeoutRef.current = null;
+      }
     };
   }, []);
 
+  function showTransientError(msg: string) {
+    setPhase("error");
+    setError(msg);
+    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    errorTimeoutRef.current = setTimeout(() => {
+      setPhase("idle");
+      setError(null);
+      errorTimeoutRef.current = null;
+    }, 4000);
+  }
+
   async function start() {
-    setError(null);
     if (disabled) return;
+    if (isStartingRef.current) return;
+    isStartingRef.current = true;
+    setError(null);
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -51,6 +74,8 @@ export function VoiceRecorder({ onText, disabled }: Props) {
       } else {
         setError(`Ошибка: ${msg}`);
       }
+    } finally {
+      isStartingRef.current = false;
     }
   }
 
@@ -72,11 +97,22 @@ export function VoiceRecorder({ onText, disabled }: Props) {
         return;
       }
       const { text } = await transcribeAudio(blob);
-      if (text) onText(text);
+      if (!text || !text.trim()) {
+        showTransientError("Не удалось разобрать речь — попробуй ещё раз громче и чётче.");
+        return;
+      }
+      onText(text);
       setPhase("idle");
     } catch (e) {
-      setPhase("error");
-      setError(`Не получилось распознать: ${(e as Error).message}`);
+      const err = e as Error;
+      const msg = err?.message || String(e);
+      if (e instanceof TypeError || msg.includes("Failed to fetch")) {
+        setPhase("error");
+        setError("Нет связи с сервером — проверь интернет и попробуй снова.");
+      } else {
+        setPhase("error");
+        setError(`Не получилось распознать: ${msg}`);
+      }
     }
   }
 
