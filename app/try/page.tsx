@@ -83,6 +83,7 @@ export default function TryPage() {
         city: city.trim(),
         base_price: 0,
         final_price: 0,
+        has_attachment: Boolean(file),
       });
       if (file) {
         await uploadAttachment(order.id, file);

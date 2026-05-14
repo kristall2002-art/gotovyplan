@@ -18,6 +18,7 @@ export interface OrderPayload {
   lat?: number;
   lon?: number;
   notes?: string;
+  has_attachment?: boolean;
 }
 
 export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: number; created_at: string; customer_token: string }> {
