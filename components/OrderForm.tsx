@@ -46,6 +46,7 @@ export function OrderForm({
   const [discountPct, setDiscountPct] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const finalPrice = Math.round(basePrice * (1 - discountPct / 100));
 
@@ -77,6 +78,10 @@ export function OrderForm({
     }
     if (!email.trim() || !isValidEmail(email)) {
       setError("Email нужен для отправки чека и плана. Проверь формат.");
+      return;
+    }
+    if (!consentGiven) {
+      setError("Без согласия с офертой и политикой конфиденциальности не можем принять заказ.");
       return;
     }
     // Авто-применение если код введён но забыли нажать «Применить»
@@ -210,11 +215,50 @@ export function OrderForm({
         </div>
       )}
 
+      <label className="flex items-start gap-2 mb-4 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={consentGiven}
+          onChange={(e) => setConsentGiven(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)] cursor-pointer"
+        />
+        <span className="text-[13px] leading-snug text-[var(--muted)]">
+          Я принимаю условия{" "}
+          <a
+            href="/offer"
+            target="_blank"
+            rel="noopener"
+            className="text-[var(--accent)] hover:underline"
+          >
+            Публичной оферты
+          </a>
+          ,{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener"
+            className="text-[var(--accent)] hover:underline"
+          >
+            Политики конфиденциальности
+          </a>{" "}
+          и даю{" "}
+          <a
+            href="/consent"
+            target="_blank"
+            rel="noopener"
+            className="text-[var(--accent)] hover:underline"
+          >
+            Согласие на обработку персональных данных
+          </a>{" "}
+          по 152-ФЗ
+        </span>
+      </label>
+
       <button
         type="button"
         onClick={submit}
-        disabled={submitting}
-        className="w-full px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
+        disabled={submitting || !consentGiven || !name.trim() || !email.trim()}
+        className="w-full px-8 py-4 rounded-xl bg-[var(--accent)] text-white font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {submitting ? (
           <>
@@ -234,18 +278,6 @@ export function OrderForm({
 
       <p className="text-xs text-[var(--muted)] text-center mt-3">
         Оплата через ЮKassa: карта, СБП, SberPay, YandexPay. Чек на email.
-      </p>
-
-      <p className="text-xs text-[var(--muted)] text-center mt-2">
-        Нажимая кнопку, ты подтверждаешь согласие с{" "}
-        <a href="/offer" className="underline hover:text-[var(--accent)]">
-          офертой
-        </a>{" "}
-        и{" "}
-        <a href="/privacy" className="underline hover:text-[var(--accent)]">
-          обработкой персональных данных
-        </a>
-        .
       </p>
 
       <p className="text-xs text-[var(--muted)] text-center mt-3">

@@ -50,9 +50,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
-    // TODO: добавить когда страницы будут созданы
-    // { url: `${SITE_URL}/offer/`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    // { url: `${SITE_URL}/privacy/`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    // { url: `${SITE_URL}/consent/`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    {
+      url: `${SITE_URL}/offer/`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/privacy/`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/consent/`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
 }
