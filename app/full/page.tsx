@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { OrderForm } from "@/components/OrderForm";
+import { FullOrderSection } from "./FullOrderSection";
 import { PlanPreview } from "@/components/PlanPreview";
 
 export const metadata: Metadata = {
@@ -117,7 +117,7 @@ export default function FullPage() {
         </div>
       </div>
 
-      <OrderForm tariff="full" basePrice={14990} buttonLabel="Заказать полный план за" />
+      <FullOrderSection />
 
       <PlanPreview tier="full" />
     </div>

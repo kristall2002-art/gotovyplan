@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { OrderForm } from "@/components/OrderForm";
+import { SocOrderSection } from "./SocOrderSection";
 
 export const metadata: Metadata = {
   title: "Бизнес-план для соцконтракта — до 350 000 ₽ от государства",
@@ -104,7 +104,7 @@ export default function SocPage() {
         </p>
       </div>
 
-      <OrderForm tariff="soc" basePrice={3990} buttonLabel="Заказать план под соцконтракт за" />
+      <SocOrderSection />
     </div>
   );
 }
