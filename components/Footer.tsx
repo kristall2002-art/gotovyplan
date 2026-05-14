@@ -25,7 +25,7 @@ export function Footer() {
           </div>
         </div>
         <div className="text-xs text-[var(--muted)] border-t border-[var(--border)] pt-4">
-          ИП Золотарев Юрий Александрович · ИНН 183474446770 · АУСН
+          ИП Золотарев Юрий Николаевич · ИНН 183474446770 · АУСН
         </div>
       </div>
     </footer>

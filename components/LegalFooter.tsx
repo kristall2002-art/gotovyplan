@@ -17,7 +17,7 @@ export function LegalFooter({ current }: LegalFooterProps) {
         <a href="mailto:bp24info@mail.ru">bp24info@mail.ru</a>
       </p>
       <p>
-        ИП Золотарев Юрий Александрович · ИНН 183474446770 · АУСН
+        ИП Золотарев Юрий Николаевич · ИНН 183474446770 · АУСН
       </p>
       <p style={{ marginTop: "0.75rem" }}>
         Связанные документы:{" "}
