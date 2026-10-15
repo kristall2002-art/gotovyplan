@@ -26,7 +26,7 @@ AI-сервис автоматической генерации бизнес-п�
 | Полный план | `/full` | от 14 990 ₽ |
 | Конструктор Pro | `/pro` | от 9 990 ₽/мес |
 
-Промокоды: `START25` (25%), `LAUNCH50` (50%), `TGCHANNEL` (30%), `BP24-OWNER` (100% — мастер для владельца, пропускает ЮKassa).
+Промокоды: `START25` (25%), `LAUNCH50` (50%), `TGCHANNEL` (30%) и служебный код владельца (100%, пропускает ЮKassa). Список кодов и цены — только на сервере (`POST /api/promo/check`), служебный код — в `.env` бэкенда, в этом репо его нет.
 
 ---
 
@@ -88,7 +88,7 @@ SQLite WAL + автоэкспорт в Excel
 
 **components/ContactPicker.tsx** — выбор Telegram или email, валидация regex.
 
-**components/OrderForm.tsx** — заполнение контактов + промокод. createOrder → createPayment → редирект на ЮKassa. BP24-OWNER пропускает оплату → сразу на /paid.
+**components/OrderForm.tsx** — заполнение контактов + промокод. Промокод проверяет сервер (checkPromo). createOrder → если сервер ответил `free` — сразу /paid, иначе createPayment → редирект на ЮKassa.
 
 **components/PlanPreview.tsx** — галерея 6 SVG-образцов страниц бизнес-плана (карта конкурентов, P&L, Excel-финмодель, окупаемость, CAPEX-pie, структура PDF). Tier-aware locking — заблюренные карточки на бесплатном тарифе.
 
@@ -109,7 +109,7 @@ SQLite WAL + автоэкспорт в Excel
 | name | TEXT | имя клиента |
 | telegram | TEXT | @username |
 | email | TEXT | email |
-| promo_code | TEXT | START25 / LAUNCH50 / TGCHANNEL / BP24-OWNER |
+| promo_code | TEXT | START25 / LAUNCH50 / TGCHANNEL / OWNER (метка служебного кода) |
 | discount_pct | INT | 0–100 |
 | base_price | INT | базовая цена тарифа |
 | final_price | INT | после промокода |
@@ -214,10 +214,10 @@ SQLite WAL + автоэкспорт в Excel
 12. Заявка появляется в orders.xlsx со статусом `paid`
 13. **TODO:** AI-генерация плана + автоотправка клиенту
 
-### С промокодом BP24-OWNER:
+### Со служебным кодом владельца:
 
 1-7. Те же шаги
-8. Промокод `BP24-OWNER` → `final_price=0`, `notes="owner test order"` → ЮKassa **пропускается**
+8. Сервер узнаёт служебный код → `final_price=0`, ответ `free: true` → ЮKassa **пропускается**
 9. Сразу `/paid`
 
 ---

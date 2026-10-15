@@ -21,7 +21,20 @@ export interface OrderPayload {
   has_attachment?: boolean;
 }
 
-export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: number; created_at: string; customer_token: string }> {
+export async function checkPromo(code: string, tariff: string): Promise<{ valid: boolean; discount_pct: number; final_price: number | null }> {
+  const res = await fetch(`${API_BASE}/api/promo/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, tariff }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Сервер вернул ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+export async function createOrder(p: OrderPayload): Promise<{ ok: true; id: number; created_at: string; customer_token: string; final_price?: number | null; free?: boolean }> {
   const body: Record<string, unknown> = { source: "site", ...p };
   Object.keys(body).forEach((k) => {
     const v = body[k];

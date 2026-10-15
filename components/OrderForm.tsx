@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tag, Check, Loader2 } from "lucide-react";
-import { createOrder, createPayment } from "@/lib/api";
+import { checkPromo, createOrder, createPayment } from "@/lib/api";
 
 interface Props {
   buttonLabel: string;
@@ -14,14 +14,6 @@ interface Props {
   city?: string;
   contextValid?: boolean;
 }
-
-const PROMOS: Record<string, number> = {
-  START25: 25,
-  LAUNCH50: 50,
-  TGCHANNEL: 30,
-};
-
-const OWNER_CODE = "BP24-OWNER";
 
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -50,20 +42,28 @@ export function OrderForm({
 
   const finalPrice = Math.round(basePrice * (1 - discountPct / 100));
 
-  function applyPromo() {
+  // Промокоды проверяет сервер: списка кодов в браузере нет.
+  async function applyPromo(): Promise<number> {
     const code = promoCode.trim().toUpperCase();
-    if (code === OWNER_CODE) {
-      setDiscountPct(100);
-      setPromoStatus("applied");
-      return;
-    }
-    if (PROMOS[code]) {
-      setDiscountPct(PROMOS[code]);
-      setPromoStatus("applied");
-    } else if (code.length > 0) {
+    if (!code) return 0;
+    if (tariff === "other") {
       setPromoStatus("invalid");
       setDiscountPct(0);
+      return 0;
     }
+    try {
+      const r = await checkPromo(code, tariff);
+      if (r.valid) {
+        setDiscountPct(r.discount_pct);
+        setPromoStatus("applied");
+        return r.discount_pct;
+      }
+    } catch {
+      // нет связи — считаем код непроверенным, сервер всё равно пересчитает цену
+    }
+    setPromoStatus("invalid");
+    setDiscountPct(0);
+    return 0;
   }
 
   async function submit() {
@@ -88,18 +88,9 @@ export function OrderForm({
     const typedCode = promoCode.trim().toUpperCase();
     let effectiveDiscount = discountPct;
     if (promoStatus !== "applied" && typedCode) {
-      if (typedCode === OWNER_CODE) {
-        effectiveDiscount = 100;
-        setDiscountPct(100);
-        setPromoStatus("applied");
-      } else if (PROMOS[typedCode]) {
-        effectiveDiscount = PROMOS[typedCode];
-        setDiscountPct(PROMOS[typedCode]);
-        setPromoStatus("applied");
-      }
+      effectiveDiscount = await applyPromo();
     }
-    const code = (promoStatus === "applied" || effectiveDiscount > 0) ? typedCode : undefined;
-    const isOwner = code === OWNER_CODE;
+    const code = effectiveDiscount > 0 ? typedCode : undefined;
     const effectiveFinalPrice = Math.round(basePrice * (1 - effectiveDiscount / 100));
 
     setSubmitting(true);
@@ -112,14 +103,13 @@ export function OrderForm({
         promo_code: code,
         discount_pct: effectiveDiscount,
         base_price: basePrice,
-        final_price: isOwner ? 0 : effectiveFinalPrice,
+        final_price: effectiveFinalPrice,
         idea: idea?.trim() || undefined,
         business_type: businessType || undefined,
         region: region?.trim() || undefined,
         city: city?.trim() || undefined,
-        notes: isOwner ? "owner test order — bypass payment" : undefined,
       });
-      if (isOwner) {
+      if (order.free) {
         window.location.href = "/paid";
         return;
       }
